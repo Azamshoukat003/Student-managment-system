@@ -17,9 +17,7 @@ passlib[bcrypt]==1.7.4
 bcrypt==4.0.1                   # pinned: passlib 1.7.4 compat
 PyJWT==2.10.1
 
-# ── Face recognition (MTCNN detect + FaceNet embed) ──────────
+# ── Face recognition (ONNX: YuNet detect + ArcFace embed) ────
 numpy==2.4.4
 opencv-python==4.13.0.92
-mtcnn==1.0.0
-keras-facenet==0.3.2
-tensorflow==2.21.0
+onnxruntime==1.27.0

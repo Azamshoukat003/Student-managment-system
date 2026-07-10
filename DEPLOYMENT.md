@@ -4,19 +4,11 @@ Three parts: **Database** (Neon — already hosted), **Backend** (FastAPI + Tens
 **Frontend** (static React). Both backend and frontend must be served over **HTTPS** —
 camera + GPS require a secure context, and an HTTPS page can't call an HTTP API.
 
-## The one constraint — RAM for TensorFlow
+## Backend is lightweight (fits free tiers)
 
-Face recognition loads FaceNet (TensorFlow), which needs **~1–2 GB RAM** at inference.
-The 512 MB free tiers (Render/Railway/Koyeb free) will **OOM on the first face request**.
-Pick a backend host accordingly:
-
-| Path | Backend host | Cost | Notes |
-|---|---|---|---|
-| **A** (recommended, free) | Hugging Face Spaces (Docker) | Free, ~16 GB RAM | Best free fit for the ML backend |
-| **B** | Render / Railway (Docker) | Free may OOM; ~$7/mo "Starter" is safe | Simple GitHub deploys |
-| **C** (demo) | Your PC + Cloudflare Tunnel | Free | Backend runs locally, public HTTPS URL |
-
-Frontend goes on **Vercel** (free, static) in every path.
+Face recognition runs on **ONNX Runtime** (YuNet detector + ArcFace MobileFaceNet,
+~14 MB of models baked into the image) — CPU-only, ~200–300 MB RAM. So the **free
+512 MB tiers work**. Recommended free stack: **Render (backend) + Vercel (frontend)**.
 
 Files added for deployment: `backend/Dockerfile`, `backend/.dockerignore`, `frontend/vercel.json`.
 

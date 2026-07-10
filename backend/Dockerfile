@@ -1,11 +1,8 @@
-# FastAPI + FaceNet/MTCNN backend
+# FastAPI + ONNX (YuNet + ArcFace) backend — lightweight, fits a 512 MB host.
 FROM python:3.11-slim
 
 ENV PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
-    TF_CPP_MIN_LOG_LEVEL=3 \
-    HF_HOME=/app/.cache \
-    KERAS_HOME=/app/.cache/keras
+    PIP_NO_CACHE_DIR=1
 
 # System libraries needed by OpenCV
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -17,14 +14,11 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
+# App code (includes the ONNX face models under app/ml/models/)
 COPY . .
 
-# Pre-download the FaceNet + MTCNN weights at build time so the first request is
-# fast and works even without outbound internet at runtime.
-RUN python -c "from keras_facenet import FaceNet; from mtcnn import MTCNN; FaceNet(); MTCNN()" || true
+# Hosts inject $PORT (Render, etc.); default 8000.
+ENV PORT=8000
+EXPOSE 8000
 
-# Hosts inject $PORT (Render, etc.); Hugging Face Spaces expect 7860.
-ENV PORT=7860
-EXPOSE 7860
-
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-7860}"]
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

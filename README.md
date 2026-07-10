@@ -4,7 +4,7 @@ A zero-cost, web-based attendance system: teachers open GPS-restricted attendanc
 sessions; students mark attendance with **face recognition + browser GPS**. The backend
 verifies location radius, face identity, session time, and duplicates before saving.
 
-**Stack:** React (Vite) · FastAPI · Neon PostgreSQL · JWT · FaceNet + MTCNN
+**Stack:** React (Vite) · FastAPI · Neon PostgreSQL · JWT · ArcFace + YuNet (ONNX Runtime)
 
 - Requirements: [PRODUCTION_REQUIREMENTS.md](PRODUCTION_REQUIREMENTS.md)
 - Build plan & architecture: [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)
@@ -81,7 +81,7 @@ The dev server proxies `/api` to the backend on :8000, so run both together.
 
 ## Notes
 
-- The FaceNet model loads on the **first** face request (a few seconds); later requests are fast.
+- Face recognition uses ONNX Runtime (YuNet + ArcFace); models load on the first face request, then are fast. CPU-only, ~200–300 MB RAM (fits free tiers).
 - Face verification compares a capture only against the **logged-in** student's own
   embeddings, so one student can't mark using another's face.
 - Secrets live only in `backend/.env` (gitignored) — no credentials in code.

@@ -25,8 +25,9 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
 
     # Attendance tuning (spec §9, §10) --------------------------------------
-    face_match_threshold: float = 0.75
-    face_pending_threshold: float = 0.60
+    # ArcFace (ONNX) cosine thresholds — same-person ~0.65-0.93, different ~0.0
+    face_match_threshold: float = 0.45
+    face_pending_threshold: float = 0.35
     max_gps_accuracy: float = 100.0
     default_radius_meters: int = 100
 

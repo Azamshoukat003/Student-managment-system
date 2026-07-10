@@ -1,0 +1,87 @@
+/* ============================================================
+   Design tokens — minimal, professional slate palette.
+   Derived via the ui-ux-pro-max design skill:
+   "Data-Dense Dashboard" + blue primary + status colors.
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap');
+
+:root {
+  /* Brand / semantic colors */
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-weak: #eff4ff;
+  --on-primary: #ffffff;
+  --accent: #059669;
+
+  /* Neutrals (slate) */
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --fg: #0f172a;
+  --fg-muted: #64748b;
+  --fg-subtle: #94a3b8;
+  --muted: #f1f5f9;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+
+  /* Feedback */
+  --destructive: #dc2626;
+  --destructive-hover: #b91c1c;
+  --destructive-weak: #fef2f2;
+  --ring: rgba(37, 99, 235, 0.35);
+
+  /* Attendance status */
+  --present: #059669;
+  --present-weak: #ecfdf5;
+  --late: #d97706;
+  --late-weak: #fffbeb;
+  --absent: #dc2626;
+  --absent-weak: #fef2f2;
+  --pending: #2563eb;
+  --pending-weak: #eff4ff;
+
+  /* Spacing (4px scale) */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-8: 48px;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --radius-full: 999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.16);
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-brand: 'Poppins', 'Inter', system-ui, sans-serif;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-md: 16px;
+  --text-lg: 20px;
+  --text-xl: 24px;
+  --text-2xl: 30px;
+
+  /* Motion (strong custom curves — the built-in ones feel weak) */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+
+  /* Layout */
+  --sidebar-w: 244px;
+  --topbar-h: 60px;
+
+  /* Z-index scale */
+  --z-sticky: 20;
+  --z-sidebar: 40;
+  --z-modal: 100;
+  --z-toast: 1000;
+}

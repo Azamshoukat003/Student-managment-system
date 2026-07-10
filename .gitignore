@@ -1,0 +1,52 @@
+# ─────────────────────────────────────────────────────────────
+# Secrets — NEVER commit
+# ─────────────────────────────────────────────────────────────
+.env
+*.env
+!*.env.example
+
+# ─────────────────────────────────────────────────────────────
+# Python / FastAPI backend
+# ─────────────────────────────────────────────────────────────
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+attendance_dev.db
+
+# ─────────────────────────────────────────────────────────────
+# Node / React frontend
+# ─────────────────────────────────────────────────────────────
+node_modules/
+dist/
+.vite/
+*.local
+
+# ─────────────────────────────────────────────────────────────
+# Old Flask MVP (production-only repo — kept on disk, not committed)
+# ─────────────────────────────────────────────────────────────
+/app.py
+/database.py
+/ml/
+/templates/
+/static/
+/uploads/
+/requirements.txt
+/attendance.db
+/encoder.pkl
+/model.pkl
+/scaler.pkl
+*.pkl
+*.db
+
+# ─────────────────────────────────────────────────────────────
+# OS / editors / local tooling
+# ─────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.claude/
+*.log

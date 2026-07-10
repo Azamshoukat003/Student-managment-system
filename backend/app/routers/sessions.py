@@ -27,13 +27,14 @@ from app.services.attendance import (
     find_active_session,
     overlapping_open_session,
 )
+from app.services.clock import now_local
 from app.services.time_rules import window_state
 
 router = APIRouter(prefix="/api/attendance-sessions", tags=["attendance-sessions"])
 
 
 def _detail(db: Session, s: AttendanceSession, now: Optional[datetime] = None) -> SessionDetail:
-    now = now or datetime.now()
+    now = now or now_local()
     c = db.get(Class, s.class_id)
     subj = db.get(Subject, s.subject_id)
     teacher = db.get(User, s.teacher_id)
@@ -138,7 +139,7 @@ def list_sessions(
     rows = q.order_by(
         AttendanceSession.session_date.desc(), AttendanceSession.start_time.desc()
     ).all()
-    now = datetime.now()
+    now = now_local()
     return [_detail(db, s, now) for s in rows]
 
 
@@ -152,7 +153,7 @@ def active_session(
         return ActiveSessionResponse(message="You are not assigned to a class yet")
 
     auto_close_expired(db)
-    now = datetime.now()
+    now = now_local()
     s = find_active_session(db, user, now)
     if not s:
         return ActiveSessionResponse(message="No open attendance session for your class right now")

@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     # CORS -------------------------------------------------------------------
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
 
+    # App timezone offset from UTC, in minutes (default +5:00 = Pakistan / PKT).
+    # Session times are local wall-clock, so "now" is computed with this offset —
+    # independent of the server's timezone (Render runs in UTC).
+    app_utc_offset_minutes: int = 300
+
     # Attendance tuning (spec §9, §10) --------------------------------------
     # ArcFace (ONNX) cosine thresholds — same-person ~0.65-0.93, different ~0.0
     face_match_threshold: float = 0.45

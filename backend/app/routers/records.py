@@ -33,6 +33,7 @@ from app.schemas.record import (
     RecordDetail,
 )
 from app.services.attendance import find_active_session
+from app.services.clock import now_local
 from app.services.face_service import verify_identity
 from app.services.gps import check_geofence
 from app.services.reports import query_records, to_detail
@@ -53,7 +54,7 @@ def check_location(
 
     Lets the student confirm they're in range before capturing their face.
     """
-    now = datetime.now()
+    now = now_local()
     session = find_active_session(db, user, now)
     if not session:
         return LocationCheckResponse(eligible=False, message="No open session for your class right now")
@@ -100,7 +101,7 @@ async def mark_face(
     Runs checks 1-11 in order; the first failure returns a clear message and
     nothing is saved. On success a record is written with the time-based status.
     """
-    now = datetime.now()
+    now = now_local()
 
     # Checks 3,4,5: student belongs to an open, in-window session for their class.
     session = find_active_session(db, user, now)
@@ -258,7 +259,7 @@ def manual_mark(
         approval_status=APPROVAL_APPROVED,
         reason=payload.reason.strip(),
         marked_by=user.id,
-        marked_at=datetime.now(),
+        marked_at=now_local(),
     )
     db.add(record)
     db.add(
@@ -287,7 +288,7 @@ def _set_approval(db, user, record_id, new_status, comment):
         record.status = STATUS_ABSENT
     else:
         # approving resolves present/late from WHEN the student marked (marked_at)
-        when = record.marked_at or datetime.now()
+        when = record.marked_at or now_local()
         computed, _ = resolve_status(when, session) if session else (None, None)
         if computed:
             record.status = computed

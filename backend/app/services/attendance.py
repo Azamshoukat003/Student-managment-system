@@ -8,6 +8,7 @@ from app.models.attendance_session import (
     SESSION_OPEN,
     AttendanceSession,
 )
+from app.services.clock import now_local
 from app.services.time_rules import (
     WINDOW_CLOSED,
     WINDOW_LATE,
@@ -22,7 +23,7 @@ def auto_close_expired(db: Session, now: datetime | None = None) -> int:
     There is no background scheduler (zero-cost); instead this runs on relevant
     reads/writes so `status` reflects reality. Returns how many were closed.
     """
-    now = now or datetime.now()
+    now = now or now_local()
     rows = db.query(AttendanceSession).filter(AttendanceSession.status == SESSION_OPEN).all()
     closed = 0
     for s in rows:
@@ -77,7 +78,7 @@ def find_active_session(db: Session, student, now: datetime | None = None):
     """Return the open, in-window session a student may currently mark, or None."""
     if not student.class_id:
         return None
-    now = now or datetime.now()
+    now = now or now_local()
     rows = (
         db.query(AttendanceSession)
         .filter(

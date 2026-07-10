@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from app.core.deps import get_current_user
 from app.database import get_db
 from app.services.attendance import auto_close_expired
+from app.services.clock import today_local
 from app.services.reports import query_records
 from app.models.attendance_record import (
     STATUS_ABSENT,
@@ -57,7 +58,7 @@ def summary(db: Session = Depends(get_db), user: User = Depends(get_current_user
 
 
 def _admin_summary(db: Session) -> AdminDashboard:
-    today = date.today()
+    today = today_local()
     total_students = db.query(func.count(User.id)).filter(User.role == ROLE_STUDENT).scalar()
     total_teachers = db.query(func.count(User.id)).filter(User.role == ROLE_TEACHER).scalar()
     total_classes = db.query(func.count(Class.id)).scalar()
@@ -84,7 +85,7 @@ def _admin_summary(db: Session) -> AdminDashboard:
 
 
 def _teacher_summary(db: Session, user: User) -> TeacherDashboard:
-    today = date.today()
+    today = today_local()
     assigned_classes = (
         db.query(func.count(func.distinct(TeacherClass.class_id)))
         .filter(TeacherClass.teacher_id == user.id)
@@ -149,7 +150,7 @@ def attendance_trend(
     """Attendance counts over time for a chart, scoped by role (spec §17)."""
     if period not in ("today", "week", "month", "year"):
         period = "week"
-    today = date.today()
+    today = today_local()
     gran, buckets, date_from = _trend_buckets(period, today)
 
     rows = query_records(db, user, date_from=date_from, date_to=today, limit=200000)

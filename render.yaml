@@ -1,0 +1,26 @@
+# Render Blueprint — deploys the FastAPI backend as a Docker web service.
+# In Render: New → Blueprint → connect this repo. Then set the `sync: false`
+# secrets (DATABASE_URL, ADMIN_PASSWORD, CORS_ORIGINS) in the dashboard.
+services:
+  - type: web
+    name: iub-attendance-api
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL          # your Neon connection string
+        sync: false
+      - key: JWT_SECRET            # auto-generated strong secret
+        generateValue: true
+      - key: CORS_ORIGINS          # your Vercel frontend URL (set after deploy)
+        sync: false
+      - key: ADMIN_EMAIL
+        value: admin@attendance.local
+      - key: ADMIN_NAME
+        value: System Admin
+      - key: ADMIN_PASSWORD        # choose a strong admin password
+        sync: false
+      - key: JWT_EXPIRE_MINUTES
+        value: "720"

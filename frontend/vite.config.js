@@ -29,7 +29,7 @@ export default defineConfig({
       workbox: {
         // Precache the app shell; skip the big ML model + wasm and never cache the API.
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        globIgnores: ['**/models/**', '**/mediapipe/**'],
+        globIgnores: ['**/models/**', '**/mediapipe/**', '**/splash/**'],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api/],

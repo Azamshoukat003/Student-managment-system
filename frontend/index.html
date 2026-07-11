@@ -23,16 +23,20 @@
     <meta name="apple-mobile-web-app-title" content="IUB Attend" />
     <title>IUB Attendance System</title>
     <style>
-      /* Instant branded splash (shown before JS parses; removed after mount) */
+      /* Instant branded splash — only shown in the installed PWA (.show added
+         by the inline script below when running standalone) */
       #app-splash {
         position: fixed;
         inset: 0;
         z-index: 9999;
-        display: flex;
+        display: none;
         align-items: center;
         justify-content: center;
         background: linear-gradient(155deg, #1e40af 0%, #2563eb 52%, #1e3a8a 100%);
         transition: opacity 0.35s ease;
+      }
+      #app-splash.show {
+        display: flex;
       }
       #app-splash.hide {
         opacity: 0;
@@ -93,6 +97,20 @@
         <div class="s-spin"></div>
       </div>
     </div>
+    <script>
+      // Only show the splash when launched as an installed PWA (standalone),
+      // not in a regular browser tab.
+      (function () {
+        var mm = window.matchMedia
+        var standalone =
+          (mm &&
+            (mm('(display-mode: standalone)').matches ||
+              mm('(display-mode: fullscreen)').matches ||
+              mm('(display-mode: minimal-ui)').matches)) ||
+          window.navigator.standalone === true
+        if (standalone) document.getElementById('app-splash').classList.add('show')
+      })()
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

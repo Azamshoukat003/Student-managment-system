@@ -16,8 +16,28 @@ verifies location radius, face identity, session time, and duplicates before sav
 
 ## Prerequisites
 
-- Python 3.11+ (a `.venv` already exists in the repo) and Node.js 18+
-- A Neon PostgreSQL connection string (already set in `backend/.env`)
+- **Python 3.11+** and **Node.js 18+** installed and on PATH.
+- (Optional) A Neon PostgreSQL connection string. Without one, the app runs on a local
+  SQLite database automatically.
+
+## Quick start (one click)
+
+On a fresh PC, after cloning the repo:
+
+- **Windows:** double-click **`start.bat`**
+- **macOS / Linux:** run **`./run.sh`**
+
+The launcher automatically creates the Python virtual environment, installs backend and
+frontend dependencies **only if they're missing**, creates `backend/.env` from the example,
+and starts both servers — then opens the app in your browser.
+
+- App: http://localhost:5173
+- API docs: http://localhost:8000/docs
+
+To use Neon instead of local SQLite, put your connection string in `DATABASE_URL` inside
+`backend/.env`.
+
+The manual steps below do the same thing by hand.
 
 ## 1. Backend (FastAPI)
 

@@ -11,8 +11,77 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="IUB Attend" />
     <title>IUB Attendance System</title>
+    <style>
+      /* Instant branded splash (shown before JS parses; removed after mount) */
+      #app-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(155deg, #1e40af 0%, #2563eb 52%, #1e3a8a 100%);
+        transition: opacity 0.35s ease;
+      }
+      #app-splash.hide {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #app-splash .s-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+        animation: s-pop 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+      }
+      #app-splash img {
+        width: 96px;
+        height: 96px;
+        border-radius: 20px;
+        background: #fff;
+        padding: 10px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+      }
+      #app-splash .s-title {
+        color: #fff;
+        font-family: 'Poppins', system-ui, sans-serif;
+        font-weight: 600;
+        font-size: 18px;
+        letter-spacing: -0.01em;
+      }
+      #app-splash .s-spin {
+        width: 26px;
+        height: 26px;
+        border: 3px solid rgba(255, 255, 255, 0.35);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: s-rot 0.8s linear infinite;
+      }
+      @keyframes s-rot {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes s-pop {
+        from {
+          opacity: 0;
+          transform: translateY(8px) scale(0.96);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+    </style>
   </head>
   <body>
+    <div id="app-splash">
+      <div class="s-inner">
+        <img src="/icon-192.png" alt="IUB" />
+        <div class="s-title">IUB Attendance System</div>
+        <div class="s-spin"></div>
+      </div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

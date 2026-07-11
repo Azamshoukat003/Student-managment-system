@@ -18,3 +18,12 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </BrowserRouter>
   </React.StrictMode>,
 )
+
+// Fade out the branded splash once the app has mounted (min ~500ms on screen).
+const splash = document.getElementById('app-splash')
+if (splash) {
+  window.setTimeout(() => {
+    splash.classList.add('hide')
+    window.setTimeout(() => splash.remove(), 400)
+  }, 500)
+}

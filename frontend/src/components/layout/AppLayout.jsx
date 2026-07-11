@@ -4,6 +4,7 @@ import { useAuth } from '../../auth/AuthContext'
 import { NAV, ROLE_LABEL } from './navConfig'
 import { IconMenu } from '../icons'
 import UserMenu from './UserMenu'
+import PullToRefresh from '../PullToRefresh'
 
 export default function AppLayout() {
   const { user } = useAuth()
@@ -18,6 +19,7 @@ export default function AppLayout() {
 
   return (
     <div className="layout">
+      <PullToRefresh />
       {open && <div className="scrim" onClick={() => setOpen(false)} />}
       <aside className={`sidebar${open ? ' open' : ''}`}>
         <div className="sidebar-brand">

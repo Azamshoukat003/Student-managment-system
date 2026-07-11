@@ -1,7 +1,7 @@
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import or_
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_current_user, require_role
@@ -47,7 +47,8 @@ def create_user(
     db: Session = Depends(get_db),
     _: User = Depends(require_role(ROLE_ADMIN)),
 ):
-    if db.query(User).filter(User.email == payload.email).first():
+    email = payload.email.strip().lower()
+    if db.query(User).filter(func.lower(User.email) == email).first():
         raise HTTPException(status_code=409, detail="Email already exists")
     if payload.registration_number and db.query(User).filter(
         User.registration_number == payload.registration_number
@@ -56,7 +57,7 @@ def create_user(
 
     user = User(
         full_name=payload.full_name,
-        email=payload.email,
+        email=email,
         password_hash=hash_password(payload.password),
         role=payload.role,
         registration_number=payload.registration_number,
@@ -118,8 +119,11 @@ def update_user(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     data = payload.model_dump(exclude_unset=True)
-    if "email" in data and data["email"] != user.email:
-        if db.query(User).filter(User.email == data["email"]).first():
+    if "email" in data and data["email"]:
+        data["email"] = data["email"].strip().lower()
+        if data["email"] != user.email and db.query(User).filter(
+            func.lower(User.email) == data["email"]
+        ).first():
             raise HTTPException(status_code=409, detail="Email already exists")
     for field, value in data.items():
         setattr(user, field, value)

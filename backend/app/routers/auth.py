@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import or_
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_current_user
@@ -18,7 +18,12 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
     ident = payload.identifier.strip()
     user = (
         db.query(User)
-        .filter(or_(User.email == ident, User.registration_number == ident))
+        .filter(
+            or_(
+                func.lower(User.email) == ident.lower(),  # email is case-insensitive
+                User.registration_number == ident,
+            )
+        )
         .first()
     )
     if not user or not verify_password(payload.password, user.password_hash):

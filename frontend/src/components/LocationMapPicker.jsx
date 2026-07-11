@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Circle, useMap, useMapEvents } from 'r
 import 'leaflet/dist/leaflet.css'
 import { IconLocate } from './icons'
 import { sessionPinIcon as pinIcon, userLocIcon as userIcon } from './mapIcons'
+import { getCurrentPosition } from '../lib/geo'
 
 // Default view: The Islamia University of Bahawalpur (approx).
 export const DEFAULT_CENTER = { lat: 29.3872, lng: 71.7625 }
@@ -81,15 +82,11 @@ export default function LocationMapPicker({ lat, lng, radius = 100, onChange, re
   }
 
   const locate = () => {
-    if (!navigator.geolocation) return
-    navigator.geolocation.getCurrentPosition(
-      (p) => {
-        if (!aliveRef.current) return
-        setUserPos({ lat: p.coords.latitude, lng: p.coords.longitude, accuracy: p.coords.accuracy })
-      },
-      () => {},
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 },
-    )
+    getCurrentPosition()
+      .then((p) => {
+        if (aliveRef.current) setUserPos({ lat: p.latitude, lng: p.longitude, accuracy: p.accuracy })
+      })
+      .catch(() => {})
   }
 
   // Get the current location once on mount; tear the map down fully on unmount

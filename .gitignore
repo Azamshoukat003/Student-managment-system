@@ -42,6 +42,14 @@ dist/
 *.db
 
 # ─────────────────────────────────────────────────────────────
+# Documentation — project-internal, not shipped
+# ─────────────────────────────────────────────────────────────
+/docs/
+IMPLEMENTATION_PLAN.md
+DEPLOYMENT.md
+PRODUCTION_REQUIREMENTS.md
+
+# ─────────────────────────────────────────────────────────────
 # OS / editors / local tooling
 # ─────────────────────────────────────────────────────────────
 .DS_Store

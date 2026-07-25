@@ -102,6 +102,36 @@ The dev server proxies `/api` to the backend on :8000, so run both together.
 - Every capture screen also has a **"Capture manually"** fallback, so attendance never
   blocks if auto-detection misbehaves on a given device.
 
+## Deploy to production
+
+### Frontend (React) → Vercel
+
+1. Connect your GitHub repo to Vercel: https://vercel.com/new
+2. Select **root directory:** `frontend`
+3. Build command: `npm run build` (already configured in `frontend/vercel.json`)
+4. Environment variables: add `VITE_API_URL` → your backend API URL (e.g., `https://your-render-backend.onrender.com`)
+   - **Dev:** leave blank (proxy to localhost:8000 via `vite.config.js`)
+   - **Prod:** set to your Render backend URL
+5. Deploy → your frontend lives at `https://your-project.vercel.app`
+
+### Backend (Flask) → Render
+
+1. Push the repo to GitHub (already done ✓)
+2. Go to https://render.com/new and connect your GitHub repo
+3. Select **Service type:** Web Service
+4. **Root directory:** `backend`
+5. **Build command:** `pip install -r requirements.txt`
+6. **Start command:** `python -m waitress --listen=0.0.0.0:8000 app.main:app`
+7. Add environment variables (in Render dashboard):
+   - `DATABASE_URL` → your Neon PostgreSQL connection string
+   - `JWT_SECRET` → generate a strong secret
+   - `CORS_ORIGINS` → your Vercel frontend URL (e.g., `https://your-project.vercel.app`)
+8. Deploy → backend lives at `https://your-project-api.onrender.com`
+
+Then update your frontend's `VITE_API_URL` environment variable to point to your Render backend.
+
+---
+
 ## Notes
 
 - Backend is **Flask** (per the docs' framework constraint) with SQLAlchemy ORM;

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "projects": [
+    {
+      "name": "Student Management System - Frontend",
+      "rootDirectory": "frontend"
+    },
+    {
+      "name": "Student Management System - Backend API",
+      "rootDirectory": "backend"
+    }
+  ]
+}

@@ -114,21 +114,42 @@ The dev server proxies `/api` to the backend on :8000, so run both together.
    - **Prod:** set to your Render backend URL
 5. Deploy → your frontend lives at `https://your-project.vercel.app`
 
-### Backend (Flask) → Render
+### Backend (Flask) → Vercel OR Render
 
-1. Push the repo to GitHub (already done ✓)
-2. Go to https://render.com/new and connect your GitHub repo
-3. Select **Service type:** Web Service
-4. **Root directory:** `backend`
-5. **Build command:** `pip install -r requirements.txt`
-6. **Start command:** `python -m waitress --listen=0.0.0.0:8000 app.main:app`
-7. Add environment variables (in Render dashboard):
+#### Option A: Vercel (same platform as frontend)
+
+1. Go to **https://vercel.com/new** and connect your GitHub repo
+2. Select **root directory:** `backend`
+3. Environment variables (add in Vercel dashboard):
+   - `DATABASE_URL` → your Neon PostgreSQL URL
+   - `JWT_SECRET` → generate a strong random secret
+   - `CORS_ORIGINS` → your Vercel frontend URL (e.g., `https://your-project.vercel.app`)
+   - `ADMIN_EMAIL` → `admin@attendance.local`
+   - `ADMIN_PASSWORD` → choose a strong password
+4. Deploy → backend API lives at `https://your-project-api.vercel.app`
+
+**Note:** Vercel serverless functions have a 60-second timeout. Face recognition may take 5-10 seconds on cold start, so this works but can be slower. For production with high face recognition volume, use Render instead.
+
+#### Option B: Render (recommended for long-running tasks)
+
+1. Go to https://render.com/new and connect your GitHub repo
+2. Select **Service type:** Web Service
+3. **Root directory:** `backend`
+4. **Build command:** `pip install -r requirements.txt`
+5. **Start command:** `python -m waitress --listen=0.0.0.0:8000 app.main:app`
+6. Add environment variables:
    - `DATABASE_URL` → your Neon PostgreSQL connection string
    - `JWT_SECRET` → generate a strong secret
-   - `CORS_ORIGINS` → your Vercel frontend URL (e.g., `https://your-project.vercel.app`)
-8. Deploy → backend lives at `https://your-project-api.onrender.com`
+   - `CORS_ORIGINS` → your Vercel frontend URL
+   - `ADMIN_EMAIL` → `admin@attendance.local`
+   - `ADMIN_PASSWORD` → choose a strong password
+7. Deploy → backend lives at `https://your-project-api.onrender.com`
 
-Then update your frontend's `VITE_API_URL` environment variable to point to your Render backend.
+**Recommendation:** Use Vercel for both frontend + backend if you prefer one platform. Use Render for backend if face recognition latency matters.
+
+Then update your frontend's `VITE_API_URL` environment variable:
+- Vercel backend: `https://your-project-api.vercel.app`
+- Render backend: `https://your-project-api.onrender.com`
 
 ---
 

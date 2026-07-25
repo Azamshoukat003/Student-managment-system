@@ -23,8 +23,8 @@ export default function AppLayout() {
       {open && <div className="scrim" onClick={() => setOpen(false)} />}
       <aside className={`sidebar${open ? ' open' : ''}`}>
         <div className="sidebar-brand">
-          <img src="/logo.jpg" alt="IUB" className="brand-logo" />
-          <span className="brand-name">IUB Attendance System</span>
+          <img src="/logo.png" alt="IUB" className="brand-logo" />
+          <span className="brand-name">Student Management System</span>
         </div>
         <nav className="nav">
           <span className="nav-section">{ROLE_LABEL[user.role]}</span>

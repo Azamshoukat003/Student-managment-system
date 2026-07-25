@@ -1,4 +1,4 @@
-# Render Blueprint — deploys the FastAPI backend as a Docker web service.
+# Render Blueprint — deploys the Flask backend as a Docker web service.
 # In Render: New → Blueprint → connect this repo. Then set the `sync: false`
 # secrets (DATABASE_URL, ADMIN_PASSWORD, CORS_ORIGINS) in the dashboard.
 services:

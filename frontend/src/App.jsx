@@ -6,6 +6,7 @@ import NotFound from './pages/NotFound'
 import Dashboard from './pages/Dashboard'
 import Profile from './pages/Profile'
 import Users from './pages/admin/Users'
+import Students from './pages/admin/Students'
 import Classes from './pages/admin/Classes'
 import Subjects from './pages/admin/Subjects'
 import Assignments from './pages/admin/Assignments'
@@ -34,6 +35,7 @@ export default function App() {
         <Route index element={<Dashboard />} />
         <Route path="profile" element={<Profile />} />
         <Route path="users" element={<Admin><Users /></Admin>} />
+        <Route path="students" element={<Admin><Students /></Admin>} />
         <Route path="classes" element={<Admin><Classes /></Admin>} />
         <Route path="subjects" element={<Admin><Subjects /></Admin>} />
         <Route path="assignments" element={<Admin><Assignments /></Admin>} />

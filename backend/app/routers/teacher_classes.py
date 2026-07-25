@@ -1,20 +1,17 @@
-from typing import Optional
+from flask import Blueprint, g, jsonify
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-
-from app.core.deps import get_current_user, require_role
-from app.database import get_db
+from app.core.deps import require_auth, require_role
 from app.models.klass import Class
 from app.models.subject import Subject
 from app.models.teacher_class import TeacherClass
 from app.models.user import ROLE_ADMIN, ROLE_TEACHER, User
 from app.schemas.teacher_class import TeacherClassCreate, TeacherClassDetail
+from app.web import ApiError, dump, parse_body, q_int
 
-router = APIRouter(prefix="/api/teacher-classes", tags=["teacher-classes"])
+bp = Blueprint("teacher_classes", __name__, url_prefix="/api/teacher-classes")
 
 
-def _detail_rows(db: Session, query):
+def _detail_rows(db, query):
     """Join assignment rows with teacher/class/subject names for display."""
     rows = query.all()
     result = []
@@ -36,45 +33,39 @@ def _detail_rows(db: Session, query):
     return result
 
 
-@router.get("", response_model=list[TeacherClassDetail])
-def list_assignments(
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
-    teacher_id: Optional[int] = None,
-):
+@bp.get("")
+@require_auth
+def list_assignments():
+    teacher_id = q_int("teacher_id")
     # Admins see all (optionally filtered); teachers see only their own.
-    q = db.query(TeacherClass)
-    if user.role == ROLE_TEACHER:
-        q = q.filter(TeacherClass.teacher_id == user.id)
-    elif user.role == ROLE_ADMIN:
+    q = g.db.query(TeacherClass)
+    if g.user.role == ROLE_TEACHER:
+        q = q.filter(TeacherClass.teacher_id == g.user.id)
+    elif g.user.role == ROLE_ADMIN:
         if teacher_id is not None:
             q = q.filter(TeacherClass.teacher_id == teacher_id)
     else:
-        from fastapi import HTTPException
-
-        raise HTTPException(status_code=403, detail="Insufficient permissions")
-    return _detail_rows(db, q)
+        raise ApiError(403, "Insufficient permissions")
+    return [dump(row) for row in _detail_rows(g.db, q)]
 
 
-@router.post("", response_model=TeacherClassDetail, status_code=status.HTTP_201_CREATED)
-def create_assignment(
-    payload: TeacherClassCreate,
-    db: Session = Depends(get_db),
-    _: User = Depends(require_role(ROLE_ADMIN)),
-):
-    teacher = db.get(User, payload.teacher_id)
+@bp.post("")
+@require_role(ROLE_ADMIN)
+def create_assignment():
+    payload = parse_body(TeacherClassCreate)
+    teacher = g.db.get(User, payload.teacher_id)
     if not teacher or teacher.role != ROLE_TEACHER:
-        raise HTTPException(status_code=400, detail="teacher_id must reference a teacher")
-    if not db.get(Class, payload.class_id):
-        raise HTTPException(status_code=400, detail="class_id does not exist")
-    subject = db.get(Subject, payload.subject_id)
+        raise ApiError(400, "teacher_id must reference a teacher")
+    if not g.db.get(Class, payload.class_id):
+        raise ApiError(400, "class_id does not exist")
+    subject = g.db.get(Subject, payload.subject_id)
     if not subject:
-        raise HTTPException(status_code=400, detail="subject_id does not exist")
+        raise ApiError(400, "subject_id does not exist")
     if subject.class_id != payload.class_id:
-        raise HTTPException(status_code=400, detail="subject does not belong to that class")
+        raise ApiError(400, "subject does not belong to that class")
 
     exists = (
-        db.query(TeacherClass)
+        g.db.query(TeacherClass)
         .filter(
             TeacherClass.teacher_id == payload.teacher_id,
             TeacherClass.class_id == payload.class_id,
@@ -83,24 +74,22 @@ def create_assignment(
         .first()
     )
     if exists:
-        raise HTTPException(status_code=409, detail="Assignment already exists")
+        raise ApiError(409, "Assignment already exists")
 
     obj = TeacherClass(**payload.model_dump())
-    db.add(obj)
-    db.commit()
-    db.refresh(obj)
-    return _detail_rows(db, db.query(TeacherClass).filter(TeacherClass.id == obj.id))[0]
+    g.db.add(obj)
+    g.db.commit()
+    g.db.refresh(obj)
+    row = _detail_rows(g.db, g.db.query(TeacherClass).filter(TeacherClass.id == obj.id))[0]
+    return dump(row), 201
 
 
-@router.delete("/{assignment_id}")
-def delete_assignment(
-    assignment_id: int,
-    db: Session = Depends(get_db),
-    _: User = Depends(require_role(ROLE_ADMIN)),
-):
-    obj = db.get(TeacherClass, assignment_id)
+@bp.delete("/<int:assignment_id>")
+@require_role(ROLE_ADMIN)
+def delete_assignment(assignment_id: int):
+    obj = g.db.get(TeacherClass, assignment_id)
     if not obj:
-        raise HTTPException(status_code=404, detail="Assignment not found")
-    db.delete(obj)
-    db.commit()
-    return {"success": True}
+        raise ApiError(404, "Assignment not found")
+    g.db.delete(obj)
+    g.db.commit()
+    return jsonify({"success": True})

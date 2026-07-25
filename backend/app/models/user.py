@@ -29,6 +29,11 @@ class User(Base, TimestampMixin):
     )
     class_id: Mapped[Optional[int]] = mapped_column(ForeignKey("classes.id"), nullable=True)
     semester: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    # SRS student-record fields (docs §3.3 ERD: Student entity)
+    father_name: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    program: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    section: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    address: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
 
     # Teacher-only
     department: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)

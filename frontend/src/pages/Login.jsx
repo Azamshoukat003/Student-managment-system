@@ -7,9 +7,9 @@ import Button from '../components/ui/Button'
 import { IconAlert, IconCamera, IconPin, IconReport } from '../components/icons'
 
 const FEATURES = [
-  { icon: IconCamera, text: 'Face-verified identity' },
+  { icon: IconReport, text: 'Centralized student records' },
+  { icon: IconCamera, text: 'Face-verified attendance' },
   { icon: IconPin, text: 'GPS-restricted sessions' },
-  { icon: IconReport, text: 'Real-time attendance reports' },
 ]
 
 export default function Login() {
@@ -42,17 +42,17 @@ export default function Login() {
       {/* Left: branded panel */}
       <aside className="login-brand">
         <div className="login-brand-top login-anim" style={{ animationDelay: '40ms' }}>
-          <img src="/logo.jpg" alt="IUB" className="login-logo" />
-          <span className="login-brand-name">IUB Attendance System</span>
+          <img src="/logo.png" alt="IUB" className="login-logo" />
+          <span className="login-brand-name">Student Management System</span>
         </div>
 
         <div className="login-brand-mid">
           <h1 className="login-headline login-anim" style={{ animationDelay: '120ms' }}>
-            Attendance, verified by face &amp; location.
+            Student records &amp; attendance, in one place.
           </h1>
           <p className="login-tagline login-anim" style={{ animationDelay: '200ms' }}>
-            A secure, contactless attendance system for students and teachers at the Islamia
-            University of Bahawalpur.
+            A secure web-based student management system with face &amp; GPS verified
+            attendance for the Islamia University of Bahawalpur.
           </p>
           <ul className="login-features">
             {FEATURES.map((f, i) => (
@@ -67,7 +67,8 @@ export default function Login() {
         </div>
 
         <div className="login-brand-foot login-anim" style={{ animationDelay: '540ms' }}>
-          Islamia University of Bahawalpur
+          MTB College Sadiqabad<br />
+          <small>Islamia University of Bahawalpur</small>
         </div>
       </aside>
 
@@ -75,8 +76,8 @@ export default function Login() {
       <main className="login-form-side">
         <div className="login-form-wrap">
           <div className="login-form-brand login-anim" style={{ animationDelay: '60ms' }}>
-            <img src="/logo.jpg" alt="IUB" className="brand-logo" />
-            <span className="brand-name">IUB Attendance System</span>
+            <img src="/logo.png" alt="IUB" className="brand-logo" />
+            <span className="brand-name">Student Management System</span>
           </div>
 
           <h2 className="login-form-title login-anim" style={{ animationDelay: '120ms' }}>

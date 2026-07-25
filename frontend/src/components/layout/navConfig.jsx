@@ -14,6 +14,7 @@ import {
 export const NAV = {
   admin: [
     { to: '/', label: 'Dashboard', icon: IconDashboard, end: true },
+    { to: '/students', label: 'Students', icon: IconUsers },
     { to: '/users', label: 'Users', icon: IconUsers },
     { to: '/classes', label: 'Classes', icon: IconClass },
     { to: '/subjects', label: 'Subjects', icon: IconSubject },

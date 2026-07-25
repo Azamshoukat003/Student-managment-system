@@ -3,7 +3,7 @@
 set -e
 cd "$(dirname "$0")"
 
-echo "=== AI-Powered Smart Attendance System — Launcher ==="
+echo "=== Student Management System — Launcher ==="
 
 command -v python3 >/dev/null 2>&1 || { echo "[ERROR] Install Python 3.11+ first."; exit 1; }
 command -v node    >/dev/null 2>&1 || { echo "[ERROR] Install Node.js 18+ first."; exit 1; }
@@ -12,7 +12,7 @@ command -v node    >/dev/null 2>&1 || { echo "[ERROR] Install Node.js 18+ first.
 [ -d .venv ] || { echo "[setup] Creating virtual environment..."; python3 -m venv .venv; }
 
 # Backend: install deps if missing
-if ! .venv/bin/python -c "import fastapi, onnxruntime, cv2" >/dev/null 2>&1; then
+if ! .venv/bin/python -c "import flask, waitress, onnxruntime, cv2" >/dev/null 2>&1; then
   echo "[setup] Installing backend dependencies (first run only)..."
   .venv/bin/python -m pip install --upgrade pip
   .venv/bin/python -m pip install -r backend/requirements.txt
@@ -24,8 +24,8 @@ fi
 # Frontend: install node modules if missing
 [ -d frontend/node_modules ] || { echo "[setup] Installing frontend dependencies (first run only)..."; ( cd frontend && npm install ); }
 
-echo "[run] Backend  -> http://localhost:8000/docs"
-( cd backend && ../.venv/bin/python -m uvicorn app.main:app --port 8000 ) &
+echo "[run] Backend  -> http://localhost:8000/api/health"
+( cd backend && ../.venv/bin/python -m waitress --listen=127.0.0.1:8000 --threads=8 app.main:app ) &
 BACK=$!
 echo "[run] Frontend -> http://localhost:5173"
 ( cd frontend && npm run dev ) &

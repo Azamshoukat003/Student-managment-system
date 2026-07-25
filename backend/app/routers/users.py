@@ -1,12 +1,8 @@
-from typing import Optional
-
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from flask import Blueprint, g, jsonify
 from sqlalchemy import func, or_
-from sqlalchemy.orm import Session
 
-from app.core.deps import get_current_user, require_role
+from app.core.deps import require_auth, require_role
 from app.core.security import hash_password
-from app.database import get_db
 from app.models.user import ROLE_ADMIN, User
 from app.schemas.user import (
     ProfileUpdate,
@@ -15,45 +11,43 @@ from app.schemas.user import (
     UserOut,
     UserUpdate,
 )
+from app.web import ApiError, parse_body, q_bool, q_int, q_str, serialize, serialize_list
 
-router = APIRouter(prefix="/api/users", tags=["users"])
+bp = Blueprint("users", __name__, url_prefix="/api/users")
 
 
 # ── Self-service profile (any logged-in user) ─────────────────────────────────
-@router.get("/me", response_model=UserOut)
-def get_me(user: User = Depends(get_current_user)):
-    return user
+@bp.get("/me")
+@require_auth
+def get_me():
+    return serialize(g.user, UserOut)
 
 
-@router.put("/me", response_model=UserOut)
-def update_me(
-    payload: ProfileUpdate,
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
-):
+@bp.put("/me")
+@require_auth
+def update_me():
     """Users edit own name/phone/profile image (spec §4.4). Reg no/role/class locked."""
+    payload = parse_body(ProfileUpdate)
     data = payload.model_dump(exclude_unset=True)
     for field, value in data.items():
-        setattr(user, field, value)
-    db.commit()
-    db.refresh(user)
-    return user
+        setattr(g.user, field, value)
+    g.db.commit()
+    g.db.refresh(g.user)
+    return serialize(g.user, UserOut)
 
 
 # ── Admin user management (spec §3.1, §4.2, §4.5) ─────────────────────────────
-@router.post("", response_model=UserOut, status_code=status.HTTP_201_CREATED)
-def create_user(
-    payload: UserCreate,
-    db: Session = Depends(get_db),
-    _: User = Depends(require_role(ROLE_ADMIN)),
-):
+@bp.post("")
+@require_role(ROLE_ADMIN)
+def create_user():
+    payload = parse_body(UserCreate)
     email = payload.email.strip().lower()
-    if db.query(User).filter(func.lower(User.email) == email).first():
-        raise HTTPException(status_code=409, detail="Email already exists")
-    if payload.registration_number and db.query(User).filter(
+    if g.db.query(User).filter(func.lower(User.email) == email).first():
+        raise ApiError(409, "Email already exists")
+    if payload.registration_number and g.db.query(User).filter(
         User.registration_number == payload.registration_number
     ).first():
-        raise HTTPException(status_code=409, detail="Registration number already exists")
+        raise ApiError(409, "Registration number already exists")
 
     user = User(
         full_name=payload.full_name,
@@ -63,26 +57,29 @@ def create_user(
         registration_number=payload.registration_number,
         class_id=payload.class_id,
         semester=payload.semester,
+        # SRS student-record fields (docs §3.3 ERD: Student entity)
+        father_name=payload.father_name,
+        program=payload.program,
+        section=payload.section,
+        address=payload.address,
         department=payload.department,
         phone=payload.phone,
         is_active=payload.is_active,
     )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user
+    g.db.add(user)
+    g.db.commit()
+    g.db.refresh(user)
+    return serialize(user, UserOut), 201
 
 
-@router.get("", response_model=list[UserOut])
-def list_users(
-    db: Session = Depends(get_db),
-    _: User = Depends(require_role(ROLE_ADMIN)),
-    role: Optional[str] = None,
-    class_id: Optional[int] = None,
-    is_active: Optional[bool] = None,
-    search: Optional[str] = None,
-):
-    q = db.query(User)
+@bp.get("")
+@require_role(ROLE_ADMIN)
+def list_users():
+    role = q_str("role")
+    class_id = q_int("class_id")
+    is_active = q_bool("is_active")
+    search = q_str("search")
+    q = g.db.query(User)
     if role:
         q = q.filter(User.role == role)
     if class_id is not None:
@@ -93,78 +90,66 @@ def list_users(
         like = f"%{search}%"
         q = q.filter(or_(User.full_name.ilike(like), User.email.ilike(like),
                          User.registration_number.ilike(like)))
-    return q.order_by(User.full_name).all()
+    return serialize_list(q.order_by(User.full_name).all(), UserOut)
 
 
-@router.get("/{user_id}", response_model=UserOut)
-def get_user(
-    user_id: int,
-    db: Session = Depends(get_db),
-    _: User = Depends(require_role(ROLE_ADMIN)),
-):
-    user = db.get(User, user_id)
+@bp.get("/<int:user_id>")
+@require_role(ROLE_ADMIN)
+def get_user(user_id: int):
+    user = g.db.get(User, user_id)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
+        raise ApiError(404, "User not found")
+    return serialize(user, UserOut)
 
 
-@router.put("/{user_id}", response_model=UserOut)
-def update_user(
-    user_id: int,
-    payload: UserUpdate,
-    db: Session = Depends(get_db),
-    _: User = Depends(require_role(ROLE_ADMIN)),
-):
-    user = db.get(User, user_id)
+@bp.put("/<int:user_id>")
+@require_role(ROLE_ADMIN)
+def update_user(user_id: int):
+    payload = parse_body(UserUpdate)
+    user = g.db.get(User, user_id)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise ApiError(404, "User not found")
     data = payload.model_dump(exclude_unset=True)
     if "email" in data and data["email"]:
         data["email"] = data["email"].strip().lower()
-        if data["email"] != user.email and db.query(User).filter(
+        if data["email"] != user.email and g.db.query(User).filter(
             func.lower(User.email) == data["email"]
         ).first():
-            raise HTTPException(status_code=409, detail="Email already exists")
+            raise ApiError(409, "Email already exists")
     for field, value in data.items():
         setattr(user, field, value)
-    db.commit()
-    db.refresh(user)
-    return user
+    g.db.commit()
+    g.db.refresh(user)
+    return serialize(user, UserOut)
 
 
-@router.delete("/{user_id}")
-def deactivate_user(
-    user_id: int,
-    db: Session = Depends(get_db),
-    admin: User = Depends(require_role(ROLE_ADMIN)),
-):
+@bp.delete("/<int:user_id>")
+@require_role(ROLE_ADMIN)
+def deactivate_user(user_id: int):
     """Soft-delete: deactivate rather than hard delete (spec §4.5)."""
-    user = db.get(User, user_id)
+    user = g.db.get(User, user_id)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    if user.id == admin.id:
-        raise HTTPException(status_code=400, detail="You cannot deactivate your own account")
+        raise ApiError(404, "User not found")
+    if user.id == g.user.id:
+        raise ApiError(400, "You cannot deactivate your own account")
     user.is_active = False
     # deactivated students must not be recognized in live attendance (spec §4.5)
     from app.models.face_embedding import FaceEmbedding
-    db.query(FaceEmbedding).filter(FaceEmbedding.student_id == user.id).update(
+    g.db.query(FaceEmbedding).filter(FaceEmbedding.student_id == user.id).update(
         {FaceEmbedding.is_active: False}
     )
-    db.commit()
-    return {"success": True}
+    g.db.commit()
+    return jsonify({"success": True})
 
 
-@router.post("/{user_id}/reset-password")
-def reset_password(
-    user_id: int,
-    payload: ResetPasswordRequest,
-    db: Session = Depends(get_db),
-    _: User = Depends(require_role(ROLE_ADMIN)),
-):
+@bp.post("/<int:user_id>/reset-password")
+@require_role(ROLE_ADMIN)
+def reset_password(user_id: int):
     """Admin sets a temporary password (spec §4.3)."""
-    user = db.get(User, user_id)
+    payload = parse_body(ResetPasswordRequest)
+    user = g.db.get(User, user_id)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise ApiError(404, "User not found")
     user.password_hash = hash_password(payload.new_password)
-    db.commit()
-    return {"success": True}
+    g.db.commit()
+    return jsonify({"success": True})

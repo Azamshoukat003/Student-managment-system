@@ -19,6 +19,10 @@ const emptyStudent = {
   registration_number: '',
   class_id: '',
   semester: '',
+  father_name: '',
+  program: '',
+  section: '',
+  address: '',
   department: '',
   phone: '',
   is_active: true,
@@ -70,6 +74,10 @@ export default function Users() {
         registration_number: u.registration_number || '',
         class_id: u.class_id || '',
         semester: u.semester || '',
+        father_name: u.father_name || '',
+        program: u.program || '',
+        section: u.section || '',
+        address: u.address || '',
         department: u.department || '',
         phone: u.phone || '',
         is_active: u.is_active,
@@ -95,6 +103,10 @@ export default function Users() {
           body.registration_number = f.registration_number
           body.class_id = f.class_id ? Number(f.class_id) : null
           body.semester = f.semester ? Number(f.semester) : null
+          body.father_name = f.father_name || null
+          body.program = f.program || null
+          body.section = f.section || null
+          body.address = f.address || null
         } else {
           body.department = f.department || null
         }
@@ -110,6 +122,10 @@ export default function Users() {
         if (f.role === 'student') {
           body.class_id = f.class_id ? Number(f.class_id) : null
           body.semester = f.semester ? Number(f.semester) : null
+          body.father_name = f.father_name || null
+          body.program = f.program || null
+          body.section = f.section || null
+          body.address = f.address || null
         } else {
           body.department = f.department || null
         }
@@ -313,7 +329,16 @@ export default function Users() {
                   <Field label="Semester">
                     <Input type="number" min="1" max="12" value={modal.form.semester} onChange={(e) => setForm({ semester: e.target.value })} />
                   </Field>
-                  <Field label="Class" className="full">
+                  <Field label="Father name">
+                    <Input value={modal.form.father_name} onChange={(e) => setForm({ father_name: e.target.value })} />
+                  </Field>
+                  <Field label="Program">
+                    <Input value={modal.form.program} onChange={(e) => setForm({ program: e.target.value })} placeholder="BSCS" />
+                  </Field>
+                  <Field label="Section">
+                    <Input value={modal.form.section} onChange={(e) => setForm({ section: e.target.value })} placeholder="A" />
+                  </Field>
+                  <Field label="Class">
                     <Select value={modal.form.class_id} onChange={(e) => setForm({ class_id: e.target.value })}>
                       <option value="">Unassigned</option>
                       {(classes || []).map((c) => (
@@ -322,6 +347,9 @@ export default function Users() {
                         </option>
                       ))}
                     </Select>
+                  </Field>
+                  <Field label="Address" className="full">
+                    <Input value={modal.form.address} onChange={(e) => setForm({ address: e.target.value })} />
                   </Field>
                 </>
               ) : (

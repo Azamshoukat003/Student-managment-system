@@ -1,12 +1,11 @@
-from datetime import date, datetime
+from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from flask import Blueprint, g
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.core.deps import get_current_user, require_role
-from app.database import get_db
+from app.core.deps import require_auth, require_role
 from app.models.attendance_record import AttendanceRecord
 from app.models.attendance_session import (
     SESSION_CLOSED,
@@ -29,8 +28,9 @@ from app.services.attendance import (
 )
 from app.services.clock import now_local
 from app.services.time_rules import window_state
+from app.web import ApiError, dump, parse_body, q_date, q_int, q_str
 
-router = APIRouter(prefix="/api/attendance-sessions", tags=["attendance-sessions"])
+bp = Blueprint("attendance-sessions", __name__, url_prefix="/api/attendance-sessions")
 
 
 def _detail(db: Session, s: AttendanceSession, now: Optional[datetime] = None) -> SessionDetail:
@@ -52,17 +52,16 @@ def _detail(db: Session, s: AttendanceSession, now: Optional[datetime] = None) -
     return d
 
 
-@router.post("", response_model=SessionDetail, status_code=status.HTTP_201_CREATED)
-def create_session(
-    payload: SessionCreate,
-    db: Session = Depends(get_db),
-    user: User = Depends(require_role(ROLE_TEACHER, ROLE_ADMIN)),
-):
+@bp.post("")
+@require_role(ROLE_TEACHER, ROLE_ADMIN)
+def create_session():
+    payload = parse_body(SessionCreate)
+    db, user = g.db, g.user
     if not db.get(Class, payload.class_id):
-        raise HTTPException(status_code=400, detail="class_id does not exist")
+        raise ApiError(400, "class_id does not exist")
     subject = db.get(Subject, payload.subject_id)
     if not subject or subject.class_id != payload.class_id:
-        raise HTTPException(status_code=400, detail="subject does not belong to that class")
+        raise ApiError(400, "subject does not belong to that class")
 
     # Teachers may only open sessions for classes/subjects they are assigned to.
     if user.role == ROLE_TEACHER:
@@ -76,9 +75,7 @@ def create_session(
             .first()
         )
         if not assigned:
-            raise HTTPException(
-                status_code=403, detail="You are not assigned to this class and subject"
-            )
+            raise ApiError(403, "You are not assigned to this class and subject")
 
     # Close anything already expired so it doesn't falsely block a new session.
     auto_close_expired(db)
@@ -94,9 +91,9 @@ def create_session(
         payload.late_cutoff_time,
     )
     if clash:
-        raise HTTPException(
-            status_code=409,
-            detail=(
+        raise ApiError(
+            409,
+            (
                 f"This class already has an open session ({clash.start_time.strftime('%H:%M')}"
                 f"–{(clash.late_cutoff_time or clash.end_time).strftime('%H:%M')}) overlapping this time. "
                 "Close it before opening another."
@@ -111,19 +108,19 @@ def create_session(
     db.add(s)
     db.commit()
     db.refresh(s)
-    return _detail(db, s)
+    return dump(_detail(db, s)), 201
 
 
-@router.get("", response_model=list[SessionDetail])
-def list_sessions(
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
-    class_id: Optional[int] = None,
-    session_date: Optional[date] = None,
-    status_filter: Optional[str] = None,
-):
+@bp.get("")
+@require_auth
+def list_sessions():
+    db, user = g.db, g.user
+    class_id = q_int("class_id")
+    session_date = q_date("session_date")
+    status_filter = q_str("status_filter")
+
     if user.role == ROLE_STUDENT:
-        raise HTTPException(status_code=403, detail="Insufficient permissions")
+        raise ApiError(403, "Insufficient permissions")
 
     auto_close_expired(db)
     q = db.query(AttendanceSession)
@@ -140,48 +137,47 @@ def list_sessions(
         AttendanceSession.session_date.desc(), AttendanceSession.start_time.desc()
     ).all()
     now = now_local()
-    return [_detail(db, s, now) for s in rows]
+    return [dump(_detail(db, s, now)) for s in rows]
 
 
-@router.get("/active", response_model=ActiveSessionResponse)
-def active_session(
-    db: Session = Depends(get_db),
-    user: User = Depends(require_role(ROLE_STUDENT)),
-):
+@bp.get("/active")
+@require_role(ROLE_STUDENT)
+def active_session():
     """The open session a student can currently mark, if any (spec §7 step 3)."""
+    db, user = g.db, g.user
     if not user.class_id:
-        return ActiveSessionResponse(message="You are not assigned to a class yet")
+        return dump(ActiveSessionResponse(message="You are not assigned to a class yet"))
 
     auto_close_expired(db)
     now = now_local()
     s = find_active_session(db, user, now)
     if not s:
-        return ActiveSessionResponse(message="No open attendance session for your class right now")
+        return dump(ActiveSessionResponse(message="No open attendance session for your class right now"))
 
     already = (
         db.query(AttendanceRecord)
         .filter(AttendanceRecord.session_id == s.id, AttendanceRecord.student_id == user.id)
         .first()
     )
-    return ActiveSessionResponse(
-        session=_detail(db, s, now),
-        already_marked=already is not None,
-        message="You have already marked attendance for this session" if already else "",
+    return dump(
+        ActiveSessionResponse(
+            session=_detail(db, s, now),
+            already_marked=already is not None,
+            message="You have already marked attendance for this session" if already else "",
+        )
     )
 
 
-@router.put("/{session_id}/close", response_model=SessionDetail)
-def close_session(
-    session_id: int,
-    db: Session = Depends(get_db),
-    user: User = Depends(require_role(ROLE_TEACHER, ROLE_ADMIN)),
-):
+@bp.put("/<int:session_id>/close")
+@require_role(ROLE_TEACHER, ROLE_ADMIN)
+def close_session(session_id: int):
+    db, user = g.db, g.user
     s = db.get(AttendanceSession, session_id)
     if not s:
-        raise HTTPException(status_code=404, detail="Session not found")
+        raise ApiError(404, "Session not found")
     if user.role == ROLE_TEACHER and s.teacher_id != user.id:
-        raise HTTPException(status_code=403, detail="You can only close your own sessions")
+        raise ApiError(403, "You can only close your own sessions")
     s.status = SESSION_CLOSED
     db.commit()
     db.refresh(s)
-    return _detail(db, s)
+    return dump(_detail(db, s))

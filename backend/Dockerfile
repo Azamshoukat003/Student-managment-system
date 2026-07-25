@@ -1,4 +1,4 @@
-# FastAPI + ONNX (YuNet + ArcFace) backend — lightweight, fits a 512 MB host.
+# Flask + ONNX (YuNet + ArcFace) backend — lightweight, fits a 512 MB host.
 FROM python:3.11-slim
 
 ENV PYTHONUNBUFFERED=1 \
@@ -21,4 +21,4 @@ COPY . .
 ENV PORT=8000
 EXPOSE 8000
 
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "python -m waitress --listen=0.0.0.0:${PORT:-8000} --threads=8 app.main:app"]

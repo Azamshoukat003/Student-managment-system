@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// Dev server proxies /api to the FastAPI backend so the frontend and API share
+// Dev server proxies /api to the Flask backend so the frontend and API share
 // an origin during development (no CORS juggling).
 export default defineConfig({
   plugins: [
@@ -11,9 +11,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'logo.jpg', 'apple-touch-icon.png'],
       manifest: {
-        name: 'IUB Attendance System',
-        short_name: 'IUB Attend',
-        description: 'Face + GPS attendance for the Islamia University of Bahawalpur',
+        name: 'Student Management System',
+        short_name: 'Student MS',
+        description: 'Student management with face + GPS attendance for the Islamia University of Bahawalpur',
         theme_color: '#1e40af',
         background_color: '#1e40af',
         display: 'standalone',

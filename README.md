@@ -1,24 +1,23 @@
-# Face + GPS Attendance System
+# Student Management System
 
-A zero-cost, web-based attendance system: teachers open GPS-restricted attendance
-sessions; students mark attendance with **face recognition + browser GPS**. The backend
-verifies location radius, face identity, session time, and duplicates before saving.
+A web-based **Student Management System** (per the SRS/SDD in [docs/](docs/)) built with
+**Python Flask**, extended with **face + GPS verified attendance**: admins manage student
+records (add, update, search, filter, reports); teachers open GPS-restricted attendance
+sessions; students mark attendance with **face recognition + browser GPS**.
 
-**Stack:** React (Vite) · FastAPI · Neon PostgreSQL · JWT · ArcFace + YuNet (ONNX Runtime)
+**Stack:** Flask (Python) · React (Vite) UI · SQLite / PostgreSQL (SQLAlchemy) · JWT ·
+ArcFace + YuNet (ONNX Runtime)
 
-- Requirements: [PRODUCTION_REQUIREMENTS.md](PRODUCTION_REQUIREMENTS.md)
+- Requirements docs: [docs/SRS](docs/) · [docs/SDD](docs/)
 - Build plan & architecture: [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)
-
-> The original Flask/SQLite MVP still lives in the repo root (`app.py`, `templates/`,
-> `static/`). The production system is the new `backend/` + `frontend/`.
 
 ---
 
 ## Prerequisites
 
 - **Python 3.11+** and **Node.js 18+** installed and on PATH.
-- (Optional) A Neon PostgreSQL connection string. Without one, the app runs on a local
-  SQLite database automatically.
+- (Optional) A PostgreSQL connection string (e.g. Neon). Without one, the app runs on a
+  local SQLite database automatically — matching the SDD's SQLite (dev) / SQL (prod) split.
 
 ## Quick start (one click)
 
@@ -32,23 +31,23 @@ frontend dependencies **only if they're missing**, creates `backend/.env` from t
 and starts both servers — then opens the app in your browser.
 
 - App: http://localhost:5173
-- API docs: http://localhost:8000/docs
+- API health: http://localhost:8000/api/health
 
-To use Neon instead of local SQLite, put your connection string in `DATABASE_URL` inside
-`backend/.env`.
+To use PostgreSQL instead of local SQLite, put your connection string in `DATABASE_URL`
+inside `backend/.env`.
 
 The manual steps below do the same thing by hand.
 
-## 1. Backend (FastAPI)
+## 1. Backend (Flask)
 
 ```bash
 cd backend
 ../.venv/Scripts/python.exe -m pip install -r requirements.txt   # first time only
-../.venv/Scripts/python.exe -m uvicorn app.main:app --reload --port 8000
+../.venv/Scripts/python.exe -m app.main                          # dev server on :8000
+# production-style: ../.venv/Scripts/python.exe -m waitress --listen=127.0.0.1:8000 app.main:app
 ```
 
-- API: http://localhost:8000  ·  Docs: http://localhost:8000/docs
-- On first start it creates all tables in Neon and seeds an admin from `backend/.env`
+- On first start it creates all tables and seeds an admin from `backend/.env`
   (`ADMIN_EMAIL` / `ADMIN_PASSWORD`, default `admin@attendance.local` / `admin123`).
 
 ## 2. Frontend (React)
@@ -63,29 +62,33 @@ The dev server proxies `/api` to the backend on :8000, so run both together.
 
 ## First-run walkthrough
 
-1. Log in as **admin** → create a **class**, a **subject**, a **teacher**, and a
-   **student** (assign the student to the class); then **assign** the teacher to the
-   class + subject.
-2. Log in as the **student** → **Face Registration** → capture a few photos.
-3. Log in as the **teacher** → **Sessions** → create a session (use *my location* +
+1. Log in as **admin** → **Students** → add student records (roll no, father name,
+   program, semester, section, class, address); search/filter, open a student's
+   detail, **Export CSV** or **Print** the list.
+2. Create a **class**, a **subject**, and a **teacher** (Users page); **assign** the
+   teacher to the class + subject.
+3. Log in as the **student** → **Face Registration** → capture a few photos.
+4. Log in as the **teacher** → **Sessions** → create a session (use *my location* +
    radius, and a time window that is open now).
-4. Back as the **student** → **Mark Attendance** → confirm location, then capture face.
-5. **Attendance / Reports** (admin or teacher) → filter and **Export CSV**; approve/reject
+5. Back as the **student** → **Mark Attendance** → confirm location, then capture face.
+6. **Attendance / Reports** (admin or teacher) → filter and **Export CSV**; approve/reject
    pending records; add **manual** attendance.
 
-## Feature map (spec → build)
+## Feature map (docs → build)
 
-| Spec area | Where |
+| Docs area | Where |
 |---|---|
-| 3-role JWT auth, admin CRUD | `backend/app/routers/{auth,users,classes,subjects,teacher_classes}.py` |
-| Sessions + time windows (§6, §15) | `routers/sessions.py`, `services/time_rules.py` |
-| GPS geofence (§9) | `services/gps.py`, `routers/records.py:check-location` |
-| Face embeddings + identity match (§10) | `ml/embedder.py`, `services/face_service.py`, `routers/face.py` |
-| 11-check mark pipeline (§8) | `routers/records.py:mark-face` |
-| Manual / approve-reject (§13, §14) | `routers/records.py` |
-| Reports + CSV (§16, §25) | `routers/reports.py`, `services/reports.py` |
-| Dashboards (§17) | `routers/dashboard.py` |
-| Activity logs (§26) | `routers/activity.py` |
+| Login / logout, role-based access (UC-01, UC-09) | `backend/app/routers/auth.py`, `core/deps.py` |
+| Student records CRUD (UC-02…UC-05) | `routers/users.py`, `frontend/src/pages/admin/Students.jsx` |
+| Search / filter students (UC-06) | Students page toolbar + `/api/users` query params |
+| Generate reports, print/export (UC-07) | Students page CSV/print, `routers/reports.py` |
+| Manage user accounts (UC-08) | `routers/users.py`, Users page |
+| Sessions + time windows | `routers/sessions.py`, `services/time_rules.py` |
+| GPS geofence | `services/gps.py`, `routers/records.py:check-location` |
+| Face embeddings + identity match | `ml/embedder.py`, `services/face_service.py`, `routers/face.py` |
+| Attendance mark pipeline | `routers/records.py:mark-face` |
+| Dashboards | `routers/dashboard.py` |
+| Activity logs | `routers/activity.py` |
 
 ## Camera & guided face capture
 
@@ -101,7 +104,11 @@ The dev server proxies `/api` to the backend on :8000, so run both together.
 
 ## Notes
 
-- Face recognition uses ONNX Runtime (YuNet + ArcFace); models load on the first face request, then are fast. CPU-only, ~200–300 MB RAM (fits free tiers).
+- Backend is **Flask** (per the docs' framework constraint) with SQLAlchemy ORM;
+  passwords are hashed (bcrypt via Werkzeug-compatible passlib), and admin-only routes
+  are protected with role decorators — as specified in SDD §4.7.
+- Face recognition uses ONNX Runtime (YuNet + ArcFace); models load on the first face
+  request, then are fast. CPU-only, ~200–300 MB RAM.
 - Face verification compares a capture only against the **logged-in** student's own
   embeddings, so one student can't mark using another's face.
 - Secrets live only in `backend/.env` (gitignored) — no credentials in code.

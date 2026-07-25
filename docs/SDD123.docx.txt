@@ -1,0 +1,798 @@
+
+     Web-Based Student Management System using Flask
+82867525590500
+Software DETAIL DOCUMENT
+ 
+The Islamia University of Bahawalpur
+161729721301800775579217463
+ALI AHMAD                       23405550017
+                          [session 2023_2025;BSCS]
+00
+ALI AHMAD                       23405550017
+                          [session 2023_2025;BSCS]
+                      MUHAMMAD UMAIR      23405550016
+DEPARTMENT OF COMPUTER SCIENCE &amp; IT,
+MTB COLLEGE SADIqABAD                       
+Revision History
+Date
+Description
+Author
+Revision No.
+4/11/2025
+Version 1.0
+Muhammad Umair Ali Ahmad
+First Submission
+10/01/2026
+Version 1.1
+Ali Ahmad, Muhammad Umair
+Second Submission
+Document Approval
+The following Software Requirements Specification has been accepted and approved by the following:
+Signature
+Printed Name
+Title
+Date
+Mr. Muhammad Faizan
+Supervisor (Document)
+DECLARATION
+We, hereby declare that the project titled “ Web-Based Student Management System using Flask ” is a record of original project work undertaken for the award of the degree Bachelors of Computer Science of the MTB college Khalid campus Sadiqabad during the year 2023-25. We have completed this project under the guidance of Mr. Muhammad Faizan.
+we also declare that this project report has not been submitted for the award of any degree, diploma, associateship, fellowship, or other titles anywhere else.
+The Islamia University of Bahawalpur
+MTB COLLEGE, KHALID CAMPUS, SADIQABAD
+DEPARTMENT OF COMPUTER SCIENCE AND IT
+This is to certify that the Project work entitled “(Web-Based Student Management System using Flask ” is a Bonafede work carried out by Mr. Muhammad Umair (23405550016 ) Mr. Ali Ahmad (23405550017) in partial fulfillment for the award of BACHELORS OF COMPUTER SCIENCE of the Islamia University of Bahawalpur during the year 2023-25. It is certified that all corrections/suggestions indicated for Internal Assessment have been incorporated in this report. The project report has been approved as it satisfies the academic requirements with respect to project work for the Bachelors Degree.
+_______________________         _________________________
+Signature of the Supervisor Signature of the HOD
+Mr. Muhammad Faizan Mr. Muhammad Umer
+EXORDIUMIn the name of Allah Compassionate, The Merciful. Praise be to Allah, Lord of Creation, The Compassionate, the Merciful, King of Judgment-day!You alone we worship, and to you alone we pray for help, guide us to the straight path The path of those who you have favored, not of those who have incurred your wrath, nor of those who have gone astray.
+ACKNOWLEDGMENT
+This acknowledgment transcends the authenticity of convention while we might express appreciation and appreciate to all those persons in the back of the screen who directed and encouraged us for the accomplishment of our project paintings. First and fundamental we would like to thank ALLAH ALMIGHTY who blessed us with the knowledge to finish this project together with forgiveness.
+We would like to express our deepest appreciation and wholehearted thanks to Sir Muhammad  Faizan He has been a perpetual source of direction throughout this project. His respected guidance, valuable suggestions, and inspiration make us complete the project successfully. He played an enormous part in the representation of our topic and the development of ideas.
+We acknowledge the cooperation and assistance make via Sir Muhammad Faizan. He helped and encourages us during the project without any personal interest. Lastly, We would like to thank our parents who kept backing us up in all the times, both financially and morally.
+DEDICATION
+ We would like to dedicate this work to ALLAH Almighty for giving us this opportunity to do our Bachelor's degree which would not have been possible otherwise. This project is also dedicated to all our classmates and computer science student in college.
+We also dedicated our project work to our family and many friends. A special feeling of love to our parents, whose words of encouragement and push for tenacity ring in our ears.
+Our sisters and brothers have never left our side and are very special. We also dedicate this project to our friends who have supported us throughout the entire process. 
+We will always appreciate all they have done, especially Sir Muhammad Faizan for helping us develop our technical skills, many hours of proofreading, and helping us to master the leader dots.
+ABSTRACT
+The proposed project Web-Based Student Management System using Flask is a smart and efficient web-based application designed to digitize and manage student records within educational institutions. The system aims to overcome common challenges faced in traditional manual record-keeping systems, such as data redundancy, difficulty in searching records, time-consuming report generation, and risk of data loss.
+In many institutions, student data is maintained using paper files or spreadsheets, which can lead to errors, misplacement of records, and inefficient data management. The proposed system provides a centralized digital platform that allows administrators to securely store, update, retrieve, and manage student information in an organized manner. The system supports essential operations such as adding new student records, updating existing information, deleting records, searching and filtering data, and generating reports.
+The application includes a secure login authentication mechanism to ensure data protection and role-based access control. An admin dashboard is provided to manage student data efficiently, while authorized users can view and search records as permitted. The system is developed using Python with the Flask Framework for backend processing and uses SQLite or MySQL as the database for reliable data storage. The frontend interface is designed using HTML, CSS, and Bootstrap to ensure a user-friendly and responsive experience.
+Overall, the Web-Based Student Management System improves efficiency, enhances data accuracy, reduces manual workload, and strengthens data security within educational institutions. The system provides a scalable, reliable, and easy-to-use solution for modern digital student data management.
+Table of Contents
+1  
+Introduction  
+12
+1.1  
+Introduction  
+12 
+1.2  
+Purpose  
+12 
+1.3  
+Scope  
+12  
+1.3.1
+Customer Module
+13
+1.3.2
+Admin Module
+13
+1.3.3
+Rider Module
+13
+1.4  
+Existing System  
+14 
+1.5  
+Problem Statement  
+14  
+2  
+General Description
+15 
+2.1  
+Product Perspective
+15 
+2.2  
+Product Functions 
+15 
+2.3 
+ Constraints
+15 
+2.4
+Assumptions and Dependencies
+16 
+2.5  
+Design and Implementation Constraints
+16 
+3  
+Requirement Analysis  
+17
+3.1 
+Requirement  
+17 
+3.1.1  
+Functional Requirements  
+17 
+3.1.2  
+Non-Functional Requirements  
+18 
+3.2  
+ Use Case Descriptions
+18.19
+3.3
+ERD Web-Based Student Management System
+19.20
+3.4
+DFD Web-Based Student Management System
+20.21
+3.5
+External Interface Requirements
+21
+3.5.1
+User Interface Requirements
+21
+3.5.2
+Hardware Interface Requirements
+22
+3.5.3
+Software Interface Requirements
+22
+3.5.4
+Communication Interface Requirements
+22
+4
+System Design
+23
+4.1
+Introduction
+23
+4.2
+Over All System Architecture
+23
+4.2.1
+Presentation Layer
+23
+4.2.2
+Application Layer
+24
+4.2.3
+Data Layer
+24.25
+4.3
+Module Design
+25
+4.3.1
+Customer Module
+25
+4.3.2
+Admin Module
+26
+4.3.3
+Ride Module
+26
+4.4
+Database Design
+27
+4.4.1
+Core Tables Description
+27
+4.5
+Realtime Tracking
+28
+4.6
+API Design
+28
+4.7
+Security Design
+29
+4.8
+Performance Consideration
+29
+4.9
+Error Handling and Reliability
+29
+4.10
+Deployment Environment
+30
+                                             
+CHAPTER NO. 1 – PROJECT OVERVIEW
+Introduction
+ 
+1.1 Introduction 
+In the modern digital era, educational institutions require automated systems to manage student records efficiently. Traditional manual record-keeping methods are time-consuming, error-prone, and difficult to maintain.
+The proposed Web-Based Student Management System will provide a centralized platform to manage student information digitally using Python (Flask Framework) and a database system. The system will allow secure data storage, easy retrieval, and efficient record management.
+1.2 Purpose 
+The purpose of this project is to develop a web-based system that enables educational institutions to manage student data effectively.
+The system aims to:
+Replace manual record-keeping with a digital system
+Provide secure login authentication
+Implement CRUD operations (Create, Read, Update, Delete)
+Generate reports of student records
+Improve efficiency, accuracy, and data security
+1.3 Scope 
+The scope of this project includes the development of a web-based application that will operate in a local server environment.
+The system will:
+Store and manage student records
+Allow authorized users to access the system
+Provide search and filtering options
+Generate basic student reports
+Maintain data securely in a database (SQLite/MySQL)
+1.3.1 
+Customer Module  (Web Application)
+This Customer Module refers to the general user (e.g., students or authorized users who can view limited information).
+Functional Requirements:
+Login to the system
+View personal student information
+View academic records
+Search records (if permitted)
+Logout securely
+Non-Functional Requirements:
+Secure authentication
+Fast response time
+User-friendly interface
+1.3 .2 Admin Module (Restaurant Dashboard) 
+The Admin Module is the main control module of the system. The administrator has full access to manage student records.
+Functional Requirements:
+Secure login authentication
+Add new student records
+Update existing student information
+Delete student records
+View all student records
+Search and filter student data
+Generate student reports
+Manage user accounts
+Non-Functional Requirements:
+High data security
+Reliable database storage
+Proper error handling
+Backup support
+1.4 Existing System 
+Currently, many institutions manage student data manually using:
+Paper-based records
+Excel spreadsheets
+Manual files and registers
+These systems are inefficient and prone to errors.
+1.5   Problem Statement   
+The existing manual or semi-digital systems cause several issues, including:
+Data redundancy and inconsistency
+Difficulty in searching records
+Risk of data loss
+Time-consuming report generation
+Lack of proper data security
+                             CHAPTER NO.2- GENERAL DESCRIPTION
+2.1 Product Perspective
+The proposed system is a standalone web-based application that works in a client-server environment.
+It consists of three main components:
+Frontend: HTML, CSS, Bootstrap (User Interface)
+Backend: Python with Flask Framework (Business Logic)
+Database: SQLite / MySQL (Data Storage)
+Users will access the system using a web browser, and all data will be stored in a centralized database. The system replaces the existing manual system and improves efficiency and security.
+2.2 Product Functions
+The major functions of the system are:
+Secure Login and Logout system
+Add new student records
+Update student information
+Delete student records
+View complete student details
+Search and filter student records
+Generate student reports
+Manage user accounts (Admin only)
+2.3 Constraints
+The system has the following constraints:
+The system will initially operate on a local server.
+Users must have basic computer knowledge.
+The system depends on proper database configuration.
+Hardware limitations may affect system performance.
+Security depends on proper authentication implementation.
+2.4 Assumptions and Dependencies
+The development of this system is based on the following assumptions:
+The institution will provide proper hardware and software resources.
+Users will provide accurate student information.
+The database server will remain operational.
+Regular backups will be maintained.
+Dependencies include:
+Python installation
+Flask Framework
+SQLite or MySQL database
+Web browser compatibility
+2.5 Design and Implementation Constraints 
+  The system must be developed using Python (Flask Framework).
+  The database must be SQLite or MySQL.
+  The interface should be developed using HTML, CSS, and Bootstrap.
+Sr. No.
+Constraint Category
+Description
+1
+Programming Language Constraint
+The system must be developed using Python.
+2
+Framework Constraint
+The application must use the Flask Framework for backend development.
+3
+Database Constraint
+The database must be SQLite or MySQL for storing student records.
+4
+Frontend Constraint
+The user interface must be developed using HTML, CSS, and Bootstrap.
+5
+Development Methodology Constraint
+The project must follow the Software Development Life Cycle (SDLC) methodology.
+6
+Development Tool Constraint
+The development tools used will be VS Code or PyCharm.
+  The system should follow SDLC methodology.
+.
+2.6 Tools and Technologies Used 
+ 
+Sr. No.
+Tool / Technology
+Purpose
+1
+Python
+Programming language used for backend development.
+2
+Flask Framework
+Web framework used to build the application and handle server-side logic.
+3
+SQLite / MySQL
+Database management system used to store and manage student records.
+4
+HTML
+Used to design the structure of web pages.
+5
+CSS
+Used for styling and designing the user interface.
+6
+Bootstrap
+Frontend framework used to create a responsive and user-friendly interface.
+7
+VS Code / PyCharm
+Integrated Development Environment (IDE) used for coding and development.
+8
+Web Browser (Chrome, Firefox, Edge)
+Used to run and test the web application.
+3 – Requirement Analysis
+3.1 Requirements  
+The system requirements are divided into:
+Functional Requirements
+Non-Functional Requirements
+External Interface Requirements
+3.1.1 Functional Requirements
+🔹 Functional Requirements Table
+ID
+Requirement Description
+FR-1
+The system shall allow users to register and login.
+FR-2
+The customer shall browse restaurants and menus.
+FR-3
+The customer shall place food orders online.
+FR-4
+The system shall calculate total bill automatically.
+FR-5
+The admin shall manage restaurants and menus.
+FR-6
+The admin shall view and manage all orders.
+FR-7
+The rider shall view assigned delivery orders.
+FR-8
+The rider shall update delivery status.
+FR-9
+The system shall generate order reports.
+FR-10
+The system shall allow secure logout.
+3.1.2 Non-Functional Requirements
+ 🔹 Non-Functional Requirements Table
+ID
+Requirement Type
+Description
+NFR-1
+Performance
+The system should respond within 3 seconds.
+NFR-2
+Security
+User authentication and password encryption must be implemented.
+NFR-3
+Usability
+The interface must be user-friendly and easy to navigate.
+NFR-4
+Reliability
+The system should be available 24/7.
+NFR-5
+Scalability
+The system should support increasing users.
+NFR-6
+Maintainability
+The system should allow easy updates and maintenance.
+                                                                                                                 
+3.2 Use Case Diagram (Written Description): 
+   🔹 Main Actors
+Admin
+Staff/User (optional, limited access)
+Use Case Summary Table
+Use Case ID
+Use Case Name
+Actor
+UC-01
+Login
+Admin/Staff
+UC-02
+Add Student
+Admin
+UC-03
+View Student
+Admin/Staff
+UC-04
+Update Student
+Admin
+UC-05
+Delete Student
+Admin
+UC-06
+Search/Filter Students
+Admin/Staff
+UC-07
+Generate Report
+Admin
+UC-08
+Manage Users
+Admin
+UC-09
+Logout
+Admin/Staff
+Detailed Use Case (Example)
+UC-02: Add Student
+Primary Actor: Admin
+Precondition: Admin is logged in
+Trigger: Admin clicks “Add Student”
+Main Flow:
+Admin opens Add Student form
+Admin enters student data (Name, Roll No, Program, Semester, Contact, etc.)
+System validates data
+System stores record in database
+System shows success message
+Alternate Flow:
+If Roll No already exists → system shows error and does not save
+Postcondition: Student record is saved successfully
+(You can copy this same format for UC-03 to UC-09.)
+3.3 ERD (Entity Relationship Diagram) – Student Management System
+(Text ERD representation for documentation)
+Entities and Key Attributes
+1) User
+user_ id (PK)
+username
+email
+password _hash
+role (Admin/Staff)
+status
+2) Student
+student_ id (PK)
+roll _no (Unique)
+name
+father_ name
+program
+semester
+section
+phone
+address
+created _at
+3) Report (Optional)
+report_ id (PK)
+report _type
+generated_ by (FK → User .user _id)
+generated _at 
+Relationships (ERD)
+User (1) —— (Many) ReportOne user can generate many reports.
+Student is managed by Admin/User (logical system relationship).
+If your supervisor wants a stricter ERD, we can add:Department, Course, Enrollment, Attendance, Marks tables.
+3.4 DFD Diagram Student Management System
+DFD Level 0 (Context Diagram)
+External Entities: Admin, Staff/UserProcess: Student Management SystemData Store: Student Database
+Flow (Level 0):
+Admin/Staff → (Login Request) → System
+System → (Login Response) → Admin/Staff
+Admin → (Add/Update/Delete Student Data) → System → Student Database
+Staff/Admin → (Search/View Request) → System → Student Database → (Results) → Staff/Admin
+Admin → (Report Request) → System → (Report Output) → Admin
+DFD Level 1 (Detailed)
+Processes:1.0 Authentication2.0 Manage Student Records (CRUD)3.0 Search &amp; Filter4.0 Report Generation5.0 User Management (Admin)
+Data Stores:
+D1 Users
+D2 Students
+D3 Reports (optional)
+Flow (Level 1):
+Admin/Staff → 1.0 Authentication ↔ D1 Users
+Admin → 2.0 Manage Students ↔ D2 Students
+Admin/Staff → 3.0 Search &amp; Filter ↔ D2 Students
+Admin → 4.0 Generate Reports ↔ D2 Students → (Report) → Admin
+Admin → 5.0 User Management ↔ D1 Use
+3.5 External Interface Requirements
+. User Interface (UI) Requirements
+  Login page (username/email + password)
+  Admin dashboard (total students, quick actions)
+  Student list page (search, filter, pagination)
+  Add/Edit student form with validations
+  Student detail page
+  Reports page (print/export)
+  Proper messages (success/error/validation)
+3.5.2 Hardware Interface Requirements
+  Server/PC (local server): Minimum Core i3, 4GB RAM, 10GB free storage
+  Client devices: PC/Laptop for admin/staff
+  Optional: Printer for report printing
+3.5.3 Software Interface Requirements
+  Backend: Python 3.x, Flask
+  Database: SQLite or MySQL
+  Frontend: HTML, CSS, Bootstrap
+  OS: Windows/Linux
+  Browser: Chrome/Firefox/Edge
+  IDE: VS Code / PyCharm
+3.5.4 Communication Interface Requirements
+  Runs on HTTP over Localhost / LAN
+  If deployed online: HTTPS recommended
+  Session-based authentication
+  Database communication via ORM (SQL Alchemy) or SQL queries
+CHAPTER 4 – SYSTEM DESIGN
+4.1 Introduction
+This chapter describes the overall system design of the Web-Based Student Management System using Flask.
+The purpose of the System Design Document (SDD) is to provide a detailed technical architecture and design structure of the system. It explains how the requirements defined in the SRS will be implemented using specific technologies and architectural patterns.
+The system follows a layered architecture using:
+Python (Flask Framework) – Backend
+HTML, CSS, Bootstrap – Frontend
+SQLite / MySQL – Database
+4.2 Overall System Architecture
+The system follows a Three-Tier Architecture (Layered Architecture):
+Presentation Layer
+Application Layer
+Data Layer
+This architecture improves scalability, maintainability, and security.
+4.2.1 Presentation Layer
+The Presentation Layer is the user interface of the system.
+It is responsible for:
+Displaying web pages
+Taking user input
+Sending requests to backend
+Showing results and messages
+Technologies Used:
+HTML
+CSS
+Bootstrap
+Jinja2 Templates (Flask Template Engine)
+Main UI Components:
+Login Page
+Admin Dashboard
+Student List Page
+Add/Edit Student Form
+Report Page
+Logout System
+The interface is responsive and works on modern browsers
+4.2.2 Application Layer
+The Application Layer handles business logic and processing.
+It is implemented using:
+Python
+Flask Framework
+Responsibilities:
+Authentication &amp; Authorization
+CRUD operations
+Data validation
+Report generation
+Session management
+Role-based access control
+Main Components:
+Flask Routes (Controllers)
+Service Logic
+Validation Functions
+Authentication Middleware
+Example Flow:
+User → Login Form → Flask Route → Validate → Database Check → Response
+4.2.3 Data Layer
+The Data Layer is responsible for storing and retrieving data.
+Technologies Used:
+SQLite (Local Development)OR
+MySQL (Production Environment)
+Responsibilities:
+Store student records
+Store user accounts
+Store report logs
+Maintain data integrity
+Flask communicates with database using:
+SQL Alchemy ORM (recommended)OR
+Raw SQL queries
+4.3 Module Design
+The system is divided into logical modules to improve structure and maintainability.
+Main Modules:
+Customer Module
+Admin Module
+Rider Module
+4.3.1 Customer Module
+The Customer Module allows limited access users (students/staff).
+Features:
+Login
+View personal information
+Search student data (if allowed)
+Logout
+Design Structure:
+Frontend → Flask Route → Database Query → Display Result
+Access Control:
+Role-based permissions
+Read-only access
+4.3.2 Admin Module
+The Admin Module is the core module of the system.
+Features:
+Secure Login
+Add Student
+Update Student
+Delete Student
+View All Students
+Search &amp; Filter
+Generate Reports
+Manage Users
+Design Components:
+Admin Dashboard
+Student Management Controller
+Report Generator
+User Management Controller
+Admin has full database access.
+4.3.3 Rider Module
+(Note: In your SRS this appears from template, but for Student System it can be optional. If supervisor asks, you can explain Rider as "Staff Module".)
+Features (If implemented as Staff Module):
+Login
+View Assigned Data
+Update limited student fields (if permitted)
+Logout
+4.4 Database Design
+The database is designed using relational model.
+Primary design goals:
+Avoid data redundancy
+Maintain normalization
+Ensure data integrity
+Implement foreign key constraints
+4.4.1 Core Tables Description
+1️⃣ Users Table
+Field
+Type
+Description
+User _id (PK)
+Integer
+Primary Key
+username
+Varchar
+Unique username
+email
+Varchar
+User email
+Password _hash
+Varchar
+Encrypted password
+role
+Varchar
+Admin / Staff
+status
+Boolean
+Active / Inactive
+2️⃣ Students Table
+Field
+Type
+Description
+Student _id (PK)
+Integer
+Primary Key
+Roll _no
+Varchar
+Unique Roll Number
+name
+Varchar
+Student Name
+father_ name
+Varchar
+Father Name
+program
+Varchar
+Degree Program
+semester
+Integer
+Current Semester
+section
+Varchar
+Section
+phone
+Varchar
+Contact
+address
+Text
+Address
+Created _at
+Date Time
+Record creation date
+3️⃣ Reports Table (Optional)
+Field
+Type
+Description
+Report _id (PK)
+Integer
+Primary Key
+report_ type
+Varchar
+Type of report
+Generated _by
+FK
+User ID
+generated_ at
+Date Time
+Timestamp
+4.5 Real-Time Tracking
+Although the system runs on a local server, real-time updates can be handled using:
+AJAX requests
+Flask API endpoints
+Periodic refresh
+Examples:
+Auto-refresh student list
+Instant validation (Roll No check)
+Live search functionality
+4.6 API Design
+The system provides REST-style endpoints.
+Example API Endpoints:
+Method
+Endpoint
+Description
+POST
+/login
+User login
+GET
+/students
+View all students
+POST
+/students/add
+Add new student
+PUT
+/students/update/&lt;id&gt;
+Update student
+DELETE
+/students/delete/&lt;id&gt;
+Delete student
+GET
+/report
+Generate report
+All APIs return:
+JSON responseOR
+HTML template response
+4.7 Security Design
+Security mechanisms include:
+🔐 Password hashing (Werkzeug security)🔐 Session management🔐 Role-based access control🔐 Input validation🔐 CSRF protection🔐 HTTPS (if deployed online)🔐 SQL Injection prevention (ORM)
+Admin-only routes are protected using decorators.
+4.8 Performance Consideration
+To improve performance:
+Database indexing on roll no
+Pagination for student list 
+Optimized SQL queries
+Lightweight Bootstrap UI
+Minimal server overhead
+Expected response time:Less than 3 seconds.
+4.9 Error Handling and Reliability
+The system includes:
+Try/Except blocks
+Custom error pages (404, 500)
+Form validation messages
+Transaction rollback
+Backup mechanism
+Logging:
+Flask logging system
+Error log file
+4.10 Deployment Environment
+Development Environment:
+OS: Windows/Linux
+Python 3.x
+Flask
+SQLite
+VS Code / PyCharm
+Localhost Server
+Production Environment (Future):
+Linux Server
+MySQL
+Gunicorn / WSGI
+Nginx
+HTTPS enabled
+Minimum Hardware:
+Core i3
+4GB RAM
+10GB Storage

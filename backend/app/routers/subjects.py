@@ -1,74 +1,61 @@
-from typing import Optional
+from flask import Blueprint, g, jsonify
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-
-from app.core.deps import get_current_user, require_role
-from app.database import get_db
+from app.core.deps import require_auth, require_role
 from app.models.klass import Class
 from app.models.subject import Subject
-from app.models.user import ROLE_ADMIN, User
+from app.models.user import ROLE_ADMIN
 from app.schemas.subject import SubjectCreate, SubjectOut, SubjectUpdate
+from app.web import ApiError, parse_body, q_int, serialize, serialize_list
 
-router = APIRouter(prefix="/api/subjects", tags=["subjects"])
+bp = Blueprint("subjects", __name__, url_prefix="/api/subjects")
 
 
-@router.get("", response_model=list[SubjectOut])
-def list_subjects(
-    db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
-    class_id: Optional[int] = None,
-):
-    q = db.query(Subject)
+@bp.get("")
+@require_auth
+def list_subjects():
+    class_id = q_int("class_id")
+    q = g.db.query(Subject)
     if class_id is not None:
         q = q.filter(Subject.class_id == class_id)
-    return q.order_by(Subject.name).all()
+    return serialize_list(q.order_by(Subject.name).all(), SubjectOut)
 
 
-@router.post("", response_model=SubjectOut, status_code=status.HTTP_201_CREATED)
-def create_subject(
-    payload: SubjectCreate,
-    db: Session = Depends(get_db),
-    _: User = Depends(require_role(ROLE_ADMIN)),
-):
-    if not db.get(Class, payload.class_id):
-        raise HTTPException(status_code=400, detail="class_id does not exist")
+@bp.post("")
+@require_role(ROLE_ADMIN)
+def create_subject():
+    payload = parse_body(SubjectCreate)
+    if not g.db.get(Class, payload.class_id):
+        raise ApiError(400, "class_id does not exist")
     obj = Subject(**payload.model_dump())
-    db.add(obj)
-    db.commit()
-    db.refresh(obj)
-    return obj
+    g.db.add(obj)
+    g.db.commit()
+    g.db.refresh(obj)
+    return serialize(obj, SubjectOut), 201
 
 
-@router.put("/{subject_id}", response_model=SubjectOut)
-def update_subject(
-    subject_id: int,
-    payload: SubjectUpdate,
-    db: Session = Depends(get_db),
-    _: User = Depends(require_role(ROLE_ADMIN)),
-):
-    obj = db.get(Subject, subject_id)
+@bp.put("/<int:subject_id>")
+@require_role(ROLE_ADMIN)
+def update_subject(subject_id: int):
+    payload = parse_body(SubjectUpdate)
+    obj = g.db.get(Subject, subject_id)
     if not obj:
-        raise HTTPException(status_code=404, detail="Subject not found")
+        raise ApiError(404, "Subject not found")
     data = payload.model_dump(exclude_unset=True)
-    if "class_id" in data and not db.get(Class, data["class_id"]):
-        raise HTTPException(status_code=400, detail="class_id does not exist")
+    if "class_id" in data and not g.db.get(Class, data["class_id"]):
+        raise ApiError(400, "class_id does not exist")
     for field, value in data.items():
         setattr(obj, field, value)
-    db.commit()
-    db.refresh(obj)
-    return obj
+    g.db.commit()
+    g.db.refresh(obj)
+    return serialize(obj, SubjectOut)
 
 
-@router.delete("/{subject_id}")
-def delete_subject(
-    subject_id: int,
-    db: Session = Depends(get_db),
-    _: User = Depends(require_role(ROLE_ADMIN)),
-):
-    obj = db.get(Subject, subject_id)
+@bp.delete("/<int:subject_id>")
+@require_role(ROLE_ADMIN)
+def delete_subject(subject_id: int):
+    obj = g.db.get(Subject, subject_id)
     if not obj:
-        raise HTTPException(status_code=404, detail="Subject not found")
-    db.delete(obj)
-    db.commit()
-    return {"success": True}
+        raise ApiError(404, "Subject not found")
+    g.db.delete(obj)
+    g.db.commit()
+    return jsonify({"success": True})

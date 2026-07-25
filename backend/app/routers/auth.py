@@ -1,23 +1,23 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from flask import Blueprint, g, jsonify
 from sqlalchemy import func, or_
-from sqlalchemy.orm import Session
 
-from app.core.deps import get_current_user
+from app.core.deps import require_auth
 from app.core.security import create_access_token, hash_password, verify_password
-from app.database import get_db
 from app.models.user import User
 from app.schemas.auth import ChangePasswordRequest, LoginRequest, TokenResponse
 from app.schemas.user import UserOut
+from app.web import ApiError, dump, parse_body, serialize
 
-router = APIRouter(prefix="/api/auth", tags=["auth"])
+bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 
 
-@router.post("/login", response_model=TokenResponse)
-def login(payload: LoginRequest, db: Session = Depends(get_db)):
+@bp.post("/login")
+def login():
     """Login by email or registration number (spec §4.1)."""
+    payload = parse_body(LoginRequest)
     ident = payload.identifier.strip()
     user = (
-        db.query(User)
+        g.db.query(User)
         .filter(
             or_(
                 func.lower(User.email) == ident.lower(),  # email is case-insensitive
@@ -27,34 +27,34 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
         .first()
     )
     if not user or not verify_password(payload.password, user.password_hash):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+        raise ApiError(401, "Invalid credentials")
     if not user.is_active:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account is inactive")
+        raise ApiError(403, "Account is inactive")
 
     token = create_access_token(user.id, user.role)
-    return TokenResponse(access_token=token, user=user)
+    return dump(TokenResponse(access_token=token, user=user))
 
 
-@router.post("/logout")
-def logout(_: User = Depends(get_current_user)):
+@bp.post("/logout")
+@require_auth
+def logout():
     """JWT is stateless — the client discards the token. Endpoint kept for symmetry."""
-    return {"success": True}
+    return jsonify({"success": True})
 
 
-@router.get("/me", response_model=UserOut)
-def me(user: User = Depends(get_current_user)):
-    return user
+@bp.get("/me")
+@require_auth
+def me():
+    return serialize(g.user, UserOut)
 
 
-@router.put("/password")
-def change_password(
-    payload: ChangePasswordRequest,
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
-):
+@bp.put("/password")
+@require_auth
+def change_password():
     """User changes own password (spec §4.3 step 4)."""
-    if not verify_password(payload.old_password, user.password_hash):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Current password incorrect")
-    user.password_hash = hash_password(payload.new_password)
-    db.commit()
-    return {"success": True}
+    payload = parse_body(ChangePasswordRequest)
+    if not verify_password(payload.old_password, g.user.password_hash):
+        raise ApiError(403, "Current password incorrect")
+    g.user.password_hash = hash_password(payload.new_password)
+    g.db.commit()
+    return jsonify({"success": True})

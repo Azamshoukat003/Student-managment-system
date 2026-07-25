@@ -5,12 +5,11 @@ so those figures read 0 until sessions and records exist.
 """
 from datetime import date, datetime, timedelta
 
-from fastapi import APIRouter, Depends, Query
+from flask import Blueprint, g, jsonify
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.core.deps import get_current_user
-from app.database import get_db
+from app.core.deps import require_auth
 from app.services.attendance import auto_close_expired
 from app.services.clock import today_local
 from app.services.reports import query_records
@@ -32,8 +31,9 @@ from app.schemas.dashboard import (
     StudentDashboard,
     TeacherDashboard,
 )
+from app.web import dump, q_str
 
-router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
+bp = Blueprint("dashboard", __name__, url_prefix="/api/dashboard")
 
 
 def _summary_from_rows(rows) -> StatusSummary:
@@ -46,15 +46,16 @@ def _summary_from_rows(rows) -> StatusSummary:
     )
 
 
-@router.get("/summary")
-def summary(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+@bp.get("/summary")
+@require_auth
+def summary():
     """Return a role-appropriate dashboard payload for the current user."""
-    auto_close_expired(db)
-    if user.role == "admin":
-        return _admin_summary(db)
-    if user.role == ROLE_TEACHER:
-        return _teacher_summary(db, user)
-    return _student_summary(db, user)
+    auto_close_expired(g.db)
+    if g.user.role == "admin":
+        return dump(_admin_summary(g.db))
+    if g.user.role == ROLE_TEACHER:
+        return dump(_teacher_summary(g.db, g.user))
+    return dump(_student_summary(g.db, g.user))
 
 
 def _admin_summary(db: Session) -> AdminDashboard:
@@ -141,19 +142,17 @@ def _trend_buckets(period: str, today: date):
     return "month", labels, date(seq[0][0], seq[0][1], 1)
 
 
-@router.get("/attendance-trend")
-def attendance_trend(
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
-    period: str = Query("week", alias="range"),
-):
+@bp.get("/attendance-trend")
+@require_auth
+def attendance_trend():
     """Attendance counts over time for a chart, scoped by role (spec §17)."""
+    period = q_str("range") or "week"
     if period not in ("today", "week", "month", "year"):
         period = "week"
     today = today_local()
     gran, buckets, date_from = _trend_buckets(period, today)
 
-    rows = query_records(db, user, date_from=date_from, date_to=today, limit=200000)
+    rows = query_records(g.db, g.user, date_from=date_from, date_to=today, limit=200000)
 
     counts: dict = {}
     for rec, sess, *_ in rows:
@@ -185,7 +184,7 @@ def attendance_trend(
         "late": sum(b["late"] for b in out),
         "absent": sum(b["absent"] for b in out),
     }
-    return {"range": period, "granularity": gran, "buckets": out, "totals": totals}
+    return jsonify({"range": period, "granularity": gran, "buckets": out, "totals": totals})
 
 
 def _student_summary(db: Session, user: User) -> StudentDashboard:

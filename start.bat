@@ -3,7 +3,7 @@ setlocal EnableExtensions
 cd /d "%~dp0"
 
 echo ============================================================
-echo    AI-Powered Smart Attendance System  -  Launcher
+echo    Student Management System  -  Launcher
 echo ============================================================
 echo.
 
@@ -34,7 +34,7 @@ if not exist ".venv\Scripts\python.exe" (
 )
 
 REM ---- Backend: install dependencies if missing ---------------------------
-.venv\Scripts\python -c "import fastapi, onnxruntime, cv2" >nul 2>nul
+.venv\Scripts\python -c "import flask, waitress, onnxruntime, cv2" >nul 2>nul
 if errorlevel 1 (
   echo [setup] Installing backend dependencies ^(first run only, a few minutes^) ...
   .venv\Scripts\python -m pip install --upgrade pip
@@ -61,11 +61,11 @@ if not exist "frontend\node_modules" (
 
 REM ---- Launch both servers in their own windows ---------------------------
 echo.
-echo [run] Starting backend  ->  http://localhost:8000/docs
-start "Attendance Backend" /d "%CD%\backend" cmd /k ..\.venv\Scripts\python -m uvicorn app.main:app --port 8000
+echo [run] Starting backend  ->  http://localhost:8000/api/health
+start "SMS Backend" /d "%CD%\backend" cmd /k ..\.venv\Scripts\python -m waitress --listen=127.0.0.1:8000 --threads=8 app.main:app
 
 echo [run] Starting frontend ->  http://localhost:5173
-start "Attendance Frontend" /d "%CD%\frontend" cmd /k npm run dev
+start "SMS Frontend" /d "%CD%\frontend" cmd /k npm run dev
 
 timeout /t 4 >nul
 start "" http://localhost:5173
@@ -73,8 +73,8 @@ start "" http://localhost:5173
 echo.
 echo ============================================================
 echo   Both servers are running in separate windows.
-echo   App:      http://localhost:5173
-echo   API docs: http://localhost:8000/docs
+echo   App: http://localhost:5173
+echo   API: http://localhost:8000/api/health
 echo   Close those two windows to stop the servers.
 echo ============================================================
 echo.

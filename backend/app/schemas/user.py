@@ -17,6 +17,10 @@ class UserCreate(BaseModel):
     registration_number: Optional[str] = None
     class_id: Optional[int] = None
     semester: Optional[int] = None
+    father_name: Optional[str] = None
+    program: Optional[str] = None
+    section: Optional[str] = None
+    address: Optional[str] = None
     # teacher
     department: Optional[str] = None
     phone: Optional[str] = None
@@ -37,6 +41,10 @@ class UserUpdate(BaseModel):
     department: Optional[str] = None
     class_id: Optional[int] = None
     semester: Optional[int] = None
+    father_name: Optional[str] = None
+    program: Optional[str] = None
+    section: Optional[str] = None
+    address: Optional[str] = None
     phone: Optional[str] = None
     is_active: Optional[bool] = None
 
@@ -66,6 +74,11 @@ class UserOut(BaseModel):
     department: Optional[str] = None
     class_id: Optional[int] = None
     semester: Optional[int] = None
+    # SRS student-record fields (docs §3.3 ERD: Student entity)
+    father_name: Optional[str] = None
+    program: Optional[str] = None
+    section: Optional[str] = None
+    address: Optional[str] = None
     phone: Optional[str] = None
     profile_image: Optional[str] = None
     is_active: bool

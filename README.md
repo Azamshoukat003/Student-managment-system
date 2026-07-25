@@ -120,13 +120,13 @@ The dev server proxies `/api` to the backend on :8000, so run both together.
 
 1. Go to **https://vercel.com/new** and connect your GitHub repo
 2. Select **root directory:** `backend`
-3. Environment variables (add in Vercel dashboard):
-   - `DATABASE_URL` → your Neon PostgreSQL URL
-   - `JWT_SECRET` → generate a strong random secret
-   - `CORS_ORIGINS` → your Vercel frontend URL (e.g., `https://your-project.vercel.app`)
-   - `ADMIN_EMAIL` → `admin@attendance.local`
-   - `ADMIN_PASSWORD` → choose a strong password
-4. Deploy → backend API lives at `https://your-project-api.vercel.app`
+3. **Before deploying:** click **"Environment Variables"** and add these:
+   - Key: `DATABASE_URL` · Value: your Neon PostgreSQL connection string
+   - Key: `JWT_SECRET` · Value: generate a strong random secret (e.g., use `openssl rand -base64 32`)
+   - Key: `CORS_ORIGINS` · Value: your Vercel frontend URL (e.g., `https://your-project.vercel.app`)
+   - Key: `ADMIN_EMAIL` · Value: `admin@attendance.local`
+   - Key: `ADMIN_PASSWORD` · Value: choose a strong password
+4. Click **Deploy** → backend API lives at `https://your-project-api.vercel.app`
 
 **Note:** Vercel serverless functions have a 60-second timeout. Face recognition may take 5-10 seconds on cold start, so this works but can be slower. For production with high face recognition volume, use Render instead.
 
